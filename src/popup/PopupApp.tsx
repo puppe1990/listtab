@@ -21,6 +21,7 @@ export function PopupApp() {
     setSaving(true);
     chrome.runtime.sendMessage({ type: 'saveAllTabs' }, () => {
       setSaving(false);
+      chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
       window.close();
     });
   };

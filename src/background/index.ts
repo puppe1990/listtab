@@ -11,7 +11,7 @@ chrome.runtime.onInstalled.addListener(() => {
 
 chrome.action.onClicked.addListener(async () => {
   const session = await tabManager.saveAllTabs();
-  chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+  chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/index.html') });
 });
 
 chrome.runtime.onMessage.addListener(

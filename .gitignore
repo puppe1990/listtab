@@ -1,0 +1,11 @@
+node_modules/
+dist/
+
+# Test and tool output
+coverage/
+.vite/
+*.log
+
+# Local agent docs
+AGENTS.md
+CLAUDE.md

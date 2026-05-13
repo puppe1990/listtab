@@ -4,7 +4,7 @@ import { readSessions, writeSessions } from '../shared/storage';
 export class SessionStore {
   async getAllSessions(): Promise<Session[]> {
     const sessions = await readSessions();
-    return sessions.sort((a, b) => {
+    return [...sessions].sort((a, b) => {
       if (a.isStarred !== b.isStarred) return a.isStarred ? -1 : 1;
       return b.createdAt - a.createdAt;
     });

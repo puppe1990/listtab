@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { Tab } from '../../shared/types';
 
 interface TabItemProps {
@@ -6,28 +7,37 @@ interface TabItemProps {
   onDelete: (tab: Tab) => void;
 }
 
+function getHostname(url: string): string {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return url;
+  }
+}
+
 export function TabItem({ tab, onRestore, onDelete }: TabItemProps) {
+  const [imgError, setImgError] = useState(false);
+
+  const showFallbackIcon = !tab.faviconUrl || imgError;
+
   return (
     <div className="group flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
-      {tab.faviconUrl ? (
+      {tab.faviconUrl && !imgError ? (
         <img
           src={tab.faviconUrl}
           alt={tab.title}
           className="h-5 w-5 flex-shrink-0 rounded"
-          onError={(e) => {
-            (e.target as HTMLImageElement).style.display = 'none';
-            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
-          }}
+          onError={() => setImgError(true)}
         />
       ) : null}
-      <span className={`${tab.faviconUrl ? 'hidden' : ''} flex-shrink-0 text-sm`}>🌐</span>
+      {showFallbackIcon && <span className="flex-shrink-0 text-sm">🌐</span>}
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
           {tab.title}
         </p>
         <p className="truncate text-xs text-gray-500 dark:text-gray-400">
-          {new URL(tab.url).hostname}
+          {getHostname(tab.url)}
         </p>
       </div>
 

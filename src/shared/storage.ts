@@ -3,7 +3,9 @@ import { DEFAULT_SETTINGS, STORAGE_KEY } from './constants';
 
 function chromeStorageGet(keys: string | string[] | null): Promise<Record<string, unknown>> {
   return new Promise((resolve) => {
-    chrome.storage.local.get(keys, resolve);
+    const normalized = typeof keys === 'string' ? [keys] : keys;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    chrome.storage.local.get(normalized as any, resolve);
   });
 }
 
@@ -23,9 +25,11 @@ export async function writeSessions(sessions: Session[]): Promise<void> {
   await chromeStorageSet({ [STORAGE_KEY]: sessions });
 }
 
+const SETTINGS_KEY = 'listtab_settings';
+
 export async function readSettings(): Promise<Settings> {
-  const result = await chromeStorageGet('listtab_settings');
-  const stored = result['listtab_settings'];
+  const result = await chromeStorageGet(SETTINGS_KEY);
+  const stored = result[SETTINGS_KEY];
   if (stored && typeof stored === 'object') {
     return { ...DEFAULT_SETTINGS, ...(stored as Partial<Settings>) };
   }
@@ -33,5 +37,5 @@ export async function readSettings(): Promise<Settings> {
 }
 
 export async function writeSettings(settings: Settings): Promise<void> {
-  await chromeStorageSet({ listtab_settings: settings });
+  await chromeStorageSet({ [SETTINGS_KEY]: settings });
 }

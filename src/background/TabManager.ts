@@ -49,7 +49,11 @@ export class TabManager {
     };
 
     const tabIds = chromeTabs
-      .filter((t) => t.id !== undefined && !t.pinned)
+      .filter((t) => {
+        if (t.id === undefined || t.pinned) return false;
+        if (!t.url) return false;
+        return !SKIP_URL_PREFIXES.some((prefix) => t.url!.startsWith(prefix));
+      })
       .map((t) => t.id!);
 
     const settings = await readSettings();

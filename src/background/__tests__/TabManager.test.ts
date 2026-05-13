@@ -39,8 +39,24 @@ function createMockChrome() {
         cb?.();
       }),
     },
-    _addTab(tab: chrome.tabs.Tab) {
-      tabs.push(tab);
+    _addTab(tab: Partial<chrome.tabs.Tab>) {
+      tabs.push({
+        id: 0,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: false,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        frozen: false,
+        url: '',
+        title: '',
+        ...tab,
+      } as chrome.tabs.Tab);
     },
     _getCreatedCount() {
       return createdTabs.length;
@@ -77,7 +93,7 @@ describe('TabManager', () => {
       tabs: mock.tabs,
     };
     mockStore = { saveSession: vi.fn() };
-    manager = new TabManager(mockStore as unknown as Parameters<TabManager['constructor']>[0]);
+    manager = new TabManager(mockStore as any);
   });
 
   describe('saveAllTabs', () => {
@@ -112,7 +128,7 @@ describe('TabManager', () => {
       });
 
       await manager.saveAllTabs();
-      expect(mock.tabs.remove).toHaveBeenCalledWith([1], expect.any(Function));
+      expect(mock.tabs.remove).toHaveBeenCalledWith([1], expect.anything());
     });
 
     it('should not capture pinned tabs', async () => {
@@ -176,7 +192,7 @@ describe('TabManager', () => {
       manager.restoreTab(tab);
       expect(mock.tabs.create).toHaveBeenCalledWith(
         { url: 'https://google.com', active: false },
-        expect.any(Function)
+        expect.anything()
       );
     });
   });
@@ -199,7 +215,7 @@ describe('TabManager', () => {
       expect(mock.tabs.create).toHaveBeenCalledTimes(2);
       expect(mock.tabs.create).toHaveBeenCalledWith(
         { url: 'https://a.com', active: false },
-        expect.any(Function)
+        expect.anything()
       );
     });
   });

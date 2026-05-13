@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { App } from '../App';
 
@@ -111,6 +111,30 @@ describe('App', () => {
     render(<App />);
     await waitFor(() => {
       expect(screen.getByPlaceholderText(/search tabs/i)).toBeInTheDocument();
+    });
+  });
+
+  it('should filter sessions by search query', async () => {
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      sessions: [
+        makeSession('github'),
+        makeSession('google'),
+      ],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session github')).toBeInTheDocument();
+      expect(screen.getByText('Session google')).toBeInTheDocument();
+    });
+
+    const searchInput = screen.getByPlaceholderText(/search tabs/i);
+    fireEvent.change(searchInput, { target: { value: 'github' } });
+
+    await waitFor(() => {
+      expect(screen.getByText('Session github')).toBeInTheDocument();
+      expect(screen.queryByText('Session google')).not.toBeInTheDocument();
     });
   });
 });

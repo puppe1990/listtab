@@ -45,6 +45,7 @@ describe('Toolbar', () => {
       />
     );
     expect(screen.queryByRole('button', { name: /restore everything/i })).toBeNull();
+    expect(screen.queryByRole('button', { name: /delete all/i })).toBeNull();
   });
 
   it('should call onExport when export button clicked', () => {
@@ -59,7 +60,7 @@ describe('Toolbar', () => {
         hasSessions={true}
       />
     );
-    fireEvent.click(screen.getByTitle('Export sessions'));
+    fireEvent.click(screen.getByRole('button', { name: 'Export sessions' }));
     expect(handleExport).toHaveBeenCalledOnce();
   });
 
@@ -104,5 +105,37 @@ describe('Toolbar', () => {
     );
     fireEvent.click(screen.getByRole('button', { name: /save all tabs/i }));
     expect(handleSaveAll).toHaveBeenCalledOnce();
+  });
+
+  it('should call onRestoreAll when button clicked', () => {
+    const handleRestoreAll = vi.fn();
+    render(
+      <Toolbar
+        onSaveAll={() => {}}
+        onRestoreAll={handleRestoreAll}
+        onDeleteAll={() => {}}
+        onExport={() => {}}
+        onImport={() => {}}
+        hasSessions={true}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /restore everything/i }));
+    expect(handleRestoreAll).toHaveBeenCalledOnce();
+  });
+
+  it('should call onDeleteAll when button clicked', () => {
+    const handleDeleteAll = vi.fn();
+    render(
+      <Toolbar
+        onSaveAll={() => {}}
+        onRestoreAll={() => {}}
+        onDeleteAll={handleDeleteAll}
+        onExport={() => {}}
+        onImport={() => {}}
+        hasSessions={true}
+      />
+    );
+    fireEvent.click(screen.getByRole('button', { name: /delete all/i }));
+    expect(handleDeleteAll).toHaveBeenCalledOnce();
   });
 });

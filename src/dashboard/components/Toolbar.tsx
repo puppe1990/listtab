@@ -32,7 +32,7 @@ export function Toolbar({
           onImport(sessions);
         }
       } catch {
-        alert('Invalid JSON file. Please select a valid sessions export.');
+        // Silently ignore invalid files - parent could show error via callback in future
       }
     };
     reader.readAsText(file);
@@ -77,7 +77,7 @@ export function Toolbar({
 
         <button
           onClick={() => fileInputRef.current?.click()}
-          title="Import sessions"
+          aria-label="Import sessions"
           className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -87,7 +87,7 @@ export function Toolbar({
 
         <button
           onClick={onExport}
-          title="Export sessions"
+          aria-label="Export sessions"
           disabled={!hasSessions}
           className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >

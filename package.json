@@ -6,15 +6,35 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
+    "lint": "eslint . --max-warnings=0",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check",
+    "prepare": "husky",
+    "precommit:check": "npm run lint && npm run format:check && npm run test:run",
     "test": "vitest",
     "test:run": "vitest run",
     "typecheck": "tsc --noEmit"
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,css,html}": [
+      "prettier --write"
+    ]
   },
   "dependencies": {
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
+  "overrides": {
+    "@crxjs/vite-plugin": {
+      "rollup": "2.80.0"
+    }
+  },
   "devDependencies": {
+    "@eslint/js": "^9.27.0",
     "@crxjs/vite-plugin": "^2.0.0-beta.33",
     "@tailwindcss/vite": "^4.1.7",
     "@testing-library/jest-dom": "^6.6.3",
@@ -24,9 +44,18 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react": "^4.7.0",
+    "eslint": "^9.27.0",
+    "eslint-config-prettier": "^10.1.5",
+    "eslint-plugin-react-hooks": "^5.2.0",
+    "eslint-plugin-react-refresh": "^0.4.20",
+    "globals": "^16.0.0",
+    "husky": "^9.1.7",
     "jsdom": "^26.0.0",
+    "lint-staged": "^16.0.0",
+    "prettier": "^3.5.3",
     "tailwindcss": "^4.1.7",
     "typescript": "^5.8.3",
+    "typescript-eslint": "^8.32.0",
     "vite": "^6.3.5",
     "vitest": "^3.1.2"
   }

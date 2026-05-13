@@ -10,8 +10,10 @@ chrome.runtime.onInstalled.addListener(() => {
 });
 
 chrome.action.onClicked.addListener(async () => {
-  const session = await tabManager.saveAllTabs();
-  chrome.tabs.create({ url: chrome.runtime.getURL('src/dashboard/index.html') });
+  await tabManager.saveAllTabs();
+  chrome.tabs.create({
+    url: chrome.runtime.getURL('src/dashboard/index.html'),
+  });
 });
 
 chrome.runtime.onMessage.addListener(
@@ -30,13 +32,17 @@ async function handleMessage(message: ExtensionMessage) {
       }
 
       case 'restoreTab': {
-        const { tab } = message.payload as { tab: import('../shared/types').Tab };
+        const { tab } = message.payload as {
+          tab: import('../shared/types').Tab;
+        };
         tabManager.restoreTab(tab);
         return { success: true };
       }
 
       case 'restoreSession': {
-        const { session } = message.payload as { session: import('../shared/types').Session };
+        const { session } = message.payload as {
+          session: import('../shared/types').Session;
+        };
         tabManager.restoreSession(session);
         return { success: true };
       }
@@ -55,7 +61,9 @@ async function handleMessage(message: ExtensionMessage) {
       case 'updateSession': {
         const { sessionId, updates } = message.payload as {
           sessionId: string;
-          updates: Partial<Pick<import('../shared/types').Session, 'name' | 'isStarred'>>;
+          updates: Partial<
+            Pick<import('../shared/types').Session, 'name' | 'isStarred'>
+          >;
         };
         await sessionStore.updateSession(sessionId, updates);
         return { success: true };
@@ -67,7 +75,9 @@ async function handleMessage(message: ExtensionMessage) {
       }
 
       case 'importSessions': {
-        const { sessions } = message.payload as { sessions: import('../shared/types').Session[] };
+        const { sessions } = message.payload as {
+          sessions: import('../shared/types').Session[];
+        };
         for (const session of sessions) {
           await sessionStore.saveSession(session);
         }
@@ -75,15 +85,24 @@ async function handleMessage(message: ExtensionMessage) {
       }
 
       case 'removeTabFromSession': {
-        const { sessionId, tabId } = message.payload as { sessionId: string; tabId: string };
+        const { sessionId, tabId } = message.payload as {
+          sessionId: string;
+          tabId: string;
+        };
         await sessionStore.removeTabFromSession(sessionId, tabId);
         return { success: true };
       }
 
       default:
-        return { success: false, error: `Unknown message type: ${(message as { type: string }).type}` };
+        return {
+          success: false,
+          error: `Unknown message type: ${(message as { type: string }).type}`,
+        };
     }
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    };
   }
 }

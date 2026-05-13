@@ -15,10 +15,22 @@ const makeSession = (id: string, name: string, tabs: Tab[] = []): Session => ({
 
 const mockSessions: Session[] = [
   makeSession('s1', 'Session A', [
-    { id: 't1', title: 'Tab 1', url: 'https://a.com', pinned: false, savedAt: 1 },
+    {
+      id: 't1',
+      title: 'Tab 1',
+      url: 'https://a.com',
+      pinned: false,
+      savedAt: 1,
+    },
   ]),
   makeSession('s2', 'Session B', [
-    { id: 't2', title: 'Tab 2', url: 'https://b.com', pinned: false, savedAt: 2 },
+    {
+      id: 't2',
+      title: 'Tab 2',
+      url: 'https://b.com',
+      pinned: false,
+      savedAt: 2,
+    },
   ]),
 ];
 

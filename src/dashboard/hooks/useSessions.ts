@@ -1,7 +1,10 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { Session, Tab, MessageType } from '../../shared/types';
 
-function sendMessage<T = unknown>(type: MessageType, payload?: unknown): Promise<T> {
+function sendMessage<T = unknown>(
+  type: MessageType,
+  payload?: unknown
+): Promise<T> {
   return chrome.runtime.sendMessage({ type, payload }) as Promise<T>;
 }
 
@@ -31,7 +34,10 @@ export function useSessions(): UseSessionsReturn {
   const refresh = useCallback(async () => {
     try {
       setError(null);
-      const response = await sendMessage<{ success: boolean; data?: Session[] }>('getSessions');
+      const response = await sendMessage<{
+        success: boolean;
+        data?: Session[];
+      }>('getSessions');
       if (response.success && response.data) {
         setSessions(response.data);
       }
@@ -56,27 +62,35 @@ export function useSessions(): UseSessionsReturn {
     }
   }, [refresh]);
 
-  const restoreTab = useCallback(async (tab: Tab, sessionId: string) => {
-    try {
-      setError(null);
-      await sendMessage('restoreTab', { tab });
-      await sendMessage('removeTabFromSession', { sessionId, tabId: tab.id });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to restore tab');
-    }
-  }, [refresh]);
+  const restoreTab = useCallback(
+    async (tab: Tab, sessionId: string) => {
+      try {
+        setError(null);
+        await sendMessage('restoreTab', { tab });
+        await sendMessage('removeTabFromSession', { sessionId, tabId: tab.id });
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to restore tab');
+      }
+    },
+    [refresh]
+  );
 
-  const restoreSession = useCallback(async (session: Session) => {
-    try {
-      setError(null);
-      await sendMessage('restoreSession', { session });
-      await sendMessage('deleteSession', { sessionId: session.id });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to restore session');
-    }
-  }, [refresh]);
+  const restoreSession = useCallback(
+    async (session: Session) => {
+      try {
+        setError(null);
+        await sendMessage('restoreSession', { session });
+        await sendMessage('deleteSession', { sessionId: session.id });
+        await refresh();
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to restore session'
+        );
+      }
+    },
+    [refresh]
+  );
 
   const restoreAllSessions = useCallback(async () => {
     try {
@@ -94,15 +108,20 @@ export function useSessions(): UseSessionsReturn {
     }
   }, [sessions, refresh]);
 
-  const deleteSession = useCallback(async (sessionId: string) => {
-    try {
-      setError(null);
-      await sendMessage('deleteSession', { sessionId });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete session');
-    }
-  }, [refresh]);
+  const deleteSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        setError(null);
+        await sendMessage('deleteSession', { sessionId });
+        await refresh();
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to delete session'
+        );
+      }
+    },
+    [refresh]
+  );
 
   const deleteAllSessions = useCallback(async () => {
     try {
@@ -117,39 +136,52 @@ export function useSessions(): UseSessionsReturn {
     }
   }, [sessions, refresh]);
 
-  const renameSession = useCallback(async (sessionId: string, name: string) => {
-    const prevSessions = sessions;
-    try {
-      setError(null);
-      setSessions((prev) => prev.map((s) => (s.id === sessionId ? { ...s, name } : s)));
-      await sendMessage('updateSession', { sessionId, updates: { name } });
-    } catch (err) {
-      setSessions(prevSessions);
-      setError(err instanceof Error ? err.message : 'Failed to rename');
-    }
-  }, [sessions]);
+  const renameSession = useCallback(
+    async (sessionId: string, name: string) => {
+      const prevSessions = sessions;
+      try {
+        setError(null);
+        setSessions((prev) =>
+          prev.map((s) => (s.id === sessionId ? { ...s, name } : s))
+        );
+        await sendMessage('updateSession', { sessionId, updates: { name } });
+      } catch (err) {
+        setSessions(prevSessions);
+        setError(err instanceof Error ? err.message : 'Failed to rename');
+      }
+    },
+    [sessions]
+  );
 
-  const toggleStar = useCallback(async (session: Session) => {
-    const prevSessions = sessions;
-    try {
-      setError(null);
-      setSessions((prev) =>
-        prev.map((s) => (s.id === session.id ? { ...s, isStarred: !s.isStarred } : s))
-      );
-      await sendMessage('updateSession', {
-        sessionId: session.id,
-        updates: { isStarred: !session.isStarred },
-      });
-    } catch (err) {
-      setSessions(prevSessions);
-      setError(err instanceof Error ? err.message : 'Failed to update');
-    }
-  }, [sessions]);
+  const toggleStar = useCallback(
+    async (session: Session) => {
+      const prevSessions = sessions;
+      try {
+        setError(null);
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === session.id ? { ...s, isStarred: !s.isStarred } : s
+          )
+        );
+        await sendMessage('updateSession', {
+          sessionId: session.id,
+          updates: { isStarred: !session.isStarred },
+        });
+      } catch (err) {
+        setSessions(prevSessions);
+        setError(err instanceof Error ? err.message : 'Failed to update');
+      }
+    },
+    [sessions]
+  );
 
   const exportSessions = useCallback(async () => {
     try {
       setError(null);
-      const response = await sendMessage<{ success: boolean; data?: Session[] }>('exportSessions');
+      const response = await sendMessage<{
+        success: boolean;
+        data?: Session[];
+      }>('exportSessions');
       if (response.success && response.data) {
         const blob = new Blob([JSON.stringify(response.data, null, 2)], {
           type: 'application/json',
@@ -166,25 +198,31 @@ export function useSessions(): UseSessionsReturn {
     }
   }, []);
 
-  const importSessions = useCallback(async (importedSessions: Session[]) => {
-    try {
-      setError(null);
-      await sendMessage('importSessions', { sessions: importedSessions });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to import');
-    }
-  }, [refresh]);
+  const importSessions = useCallback(
+    async (importedSessions: Session[]) => {
+      try {
+        setError(null);
+        await sendMessage('importSessions', { sessions: importedSessions });
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to import');
+      }
+    },
+    [refresh]
+  );
 
-  const deleteTab = useCallback(async (sessionId: string, tabId: string) => {
-    try {
-      setError(null);
-      await sendMessage('removeTabFromSession', { sessionId, tabId });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete tab');
-    }
-  }, [refresh]);
+  const deleteTab = useCallback(
+    async (sessionId: string, tabId: string) => {
+      try {
+        setError(null);
+        await sendMessage('removeTabFromSession', { sessionId, tabId });
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete tab');
+      }
+    },
+    [refresh]
+  );
 
   return {
     sessions,

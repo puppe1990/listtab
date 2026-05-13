@@ -52,40 +52,41 @@ Extension (Manifest V3)
 
 ```typescript
 interface Tab {
-  id: string            // uuid
-  title: string
-  url: string
-  faviconUrl?: string
-  pinned: boolean
-  savedAt: number       // timestamp
+  id: string; // uuid
+  title: string;
+  url: string;
+  faviconUrl?: string;
+  pinned: boolean;
+  savedAt: number; // timestamp
 }
 
 interface Session {
-  id: string            // uuid
-  name: string          // auto-generated or user-defined
-  tabs: Tab[]
-  createdAt: number
-  tabCount: number
-  isStarred: boolean
+  id: string; // uuid
+  name: string; // auto-generated or user-defined
+  tabs: Tab[];
+  createdAt: number;
+  tabCount: number;
+  isStarred: boolean;
 }
 
 interface TabState {
-  sessions: Session[]
-  lastBackupAt?: number
-  settings: Settings
+  sessions: Session[];
+  lastBackupAt?: number;
+  settings: Settings;
 }
 
 interface Settings {
-  autoSaveOnClose: boolean
-  maxSessions: number   // default 50
-  confirmBeforeRestore: boolean
-  darkMode: 'light' | 'dark' | 'system'
+  autoSaveOnClose: boolean;
+  maxSessions: number; // default 50
+  confirmBeforeRestore: boolean;
+  darkMode: 'light' | 'dark' | 'system';
 }
 ```
 
 ## User Flows
 
 ### 1. Save All Tabs (primary action)
+
 1. User clicks extension icon or "Save All" button in dashboard
 2. All tabs in current window are captured (title, url, favicon)
 3. All captured tabs are closed
@@ -93,11 +94,13 @@ interface Settings {
 5. Dashboard opens showing the new session
 
 ### 2. Restore Tabs
+
 - **Restore single**: Click a tab → opens in new tab, removes from session
 - **Restore all in session**: "Restore All" button → opens all, deletes session
 - **Restore all sessions**: "Restore Everything" → opens all tabs from all sessions
 
 ### 3. Manage Sessions
+
 - **Rename**: Click session name to edit inline
 - **Delete**: X button on session → confirmation if setting enabled
 - **Star/Unstar**: Pin important sessions to top
@@ -105,6 +108,7 @@ interface Settings {
 - **Import**: Upload previously exported JSON
 
 ### 4. Search & Filter
+
 - Search bar filters sessions by title, tab titles, or URLs
 - Results shown in real-time as user types
 
@@ -121,6 +125,7 @@ Dashboard/Popup  ──(chrome.runtime.sendMessage)──►  Background SW
 ```
 
 Background SW listens for messages:
+
 - `saveAllTabs` → queries tabs, stores session, closes tabs
 - `restoreTab` → creates tab from session data
 - `restoreSession` → bulk restore
@@ -155,6 +160,7 @@ No `host_permissions` needed — we don't inject content scripts.
 3. **Refactor** with confidence
 
 Test categories:
+
 - **Unit**: Pure functions (session naming, URL validation, search filtering, data transformations)
 - **Integration**: Storage operations, message passing, component rendering
 - **Component**: React component behavior with @testing-library/react

@@ -8,9 +8,14 @@ function createMockChrome() {
 
   return {
     tabs: {
-      query: vi.fn((_info: chrome.tabs.QueryInfo, cb: (tabs: chrome.tabs.Tab[]) => void) => {
-        cb([...tabs]);
-      }),
+      query: vi.fn(
+        (
+          _info: chrome.tabs.QueryInfo,
+          cb: (tabs: chrome.tabs.Tab[]) => void
+        ) => {
+          cb([...tabs]);
+        }
+      ),
       create: vi.fn((_props: unknown, cb?: (tab: chrome.tabs.Tab) => void) => {
         const newTab = {
           id: createdTabs.length + 1,
@@ -84,7 +89,7 @@ vi.mock('../../shared/storage', () => ({
 
 describe('TabManager', () => {
   let manager: TabManager;
-  let mockStore: { saveSession: ReturnType<typeof vi.fn> };
+  let mockStore: { saveSession: SessionStoreLike['saveSession'] };
   let mock: ReturnType<typeof createMockChrome>;
 
   beforeEach(() => {
@@ -93,22 +98,40 @@ describe('TabManager', () => {
       tabs: mock.tabs,
     };
     mockStore = { saveSession: vi.fn() };
-    manager = new TabManager(mockStore as any);
+    manager = new TabManager(mockStore);
   });
 
   describe('saveAllTabs', () => {
     it('should capture all tabs and create a session', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: false, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'https://google.com', title: 'Google',
+        id: 1,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'https://google.com',
+        title: 'Google',
       });
       mock._addTab({
-        id: 2, index: 1, pinned: false, highlighted: false,
-        windowId: 1, active: false, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'https://github.com', title: 'GitHub',
+        id: 2,
+        index: 1,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: false,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'https://github.com',
+        title: 'GitHub',
       });
 
       const session = await manager.saveAllTabs();
@@ -121,10 +144,19 @@ describe('TabManager', () => {
 
     it('should close captured tabs after saving', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: false, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'https://example.com', title: 'Example',
+        id: 1,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'https://example.com',
+        title: 'Example',
       });
 
       await manager.saveAllTabs();
@@ -133,10 +165,19 @@ describe('TabManager', () => {
 
     it('should not capture pinned tabs', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: true, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'chrome://newtab', title: 'New Tab',
+        id: 1,
+        index: 0,
+        pinned: true,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'chrome://newtab',
+        title: 'New Tab',
       });
 
       const session = await manager.saveAllTabs();
@@ -145,16 +186,34 @@ describe('TabManager', () => {
 
     it('should skip chrome:// and chrome-extension:// URLs', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: false, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'chrome://settings', title: 'Settings',
+        id: 1,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'chrome://settings',
+        title: 'Settings',
       });
       mock._addTab({
-        id: 2, index: 1, pinned: false, highlighted: false,
-        windowId: 1, active: false, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'https://valid.com', title: 'Valid',
+        id: 2,
+        index: 1,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: false,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'https://valid.com',
+        title: 'Valid',
       });
 
       const session = await manager.saveAllTabs();
@@ -164,9 +223,17 @@ describe('TabManager', () => {
 
     it('should generate faviconUrl from Google S2', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: false, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
+        id: 1,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
         url: 'https://github.com/matheuspuppe',
         title: 'matheuspuppe',
       });
@@ -203,8 +270,20 @@ describe('TabManager', () => {
         id: 's1',
         name: 'Test',
         tabs: [
-          { id: 't1', title: 'A', url: 'https://a.com', pinned: false, savedAt: 1 },
-          { id: 't2', title: 'B', url: 'https://b.com', pinned: false, savedAt: 2 },
+          {
+            id: 't1',
+            title: 'A',
+            url: 'https://a.com',
+            pinned: false,
+            savedAt: 1,
+          },
+          {
+            id: 't2',
+            title: 'B',
+            url: 'https://b.com',
+            pinned: false,
+            savedAt: 2,
+          },
         ],
         createdAt: 100,
         tabCount: 2,
@@ -220,3 +299,7 @@ describe('TabManager', () => {
     });
   });
 });
+
+interface SessionStoreLike {
+  saveSession(session: Session, maxSessions?: number): Promise<void>;
+}

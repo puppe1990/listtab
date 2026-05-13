@@ -1,5 +1,9 @@
 import type { Tab, Session } from '../shared/types';
-import { generateId, formatSessionName, FAVICON_BASE_URL } from '../shared/constants';
+import {
+  generateId,
+  formatSessionName,
+  FAVICON_BASE_URL,
+} from '../shared/constants';
 import { readSettings } from '../shared/storage';
 
 interface SessionStoreLike {

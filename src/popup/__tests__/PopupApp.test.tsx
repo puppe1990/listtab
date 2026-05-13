@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { PopupApp } from '../PopupApp';
@@ -21,13 +21,32 @@ const mockGetURL = vi.fn((path: string) => `chrome-extension://id/${path}`);
 };
 
 describe('PopupApp', () => {
+  const originalClose = window.close;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.stubGlobal('close', vi.fn());
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('should render Save All Tabs button', () => {
     render(<PopupApp />);
     expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+  });
+
+  it('should send saveAllTabs message when Save All clicked', async () => {
+    render(<PopupApp />);
+    fireEvent.click(screen.getByRole('button', { name: /save all tabs/i }));
+
+    await waitFor(() => {
+      expect(mockSendMessage).toHaveBeenCalledWith(
+        { type: 'saveAllTabs' },
+        expect.any(Function)
+      );
+    });
   });
 
   it('should render Open Dashboard button', () => {

@@ -4,11 +4,13 @@ import type { Session } from '../shared/types';
 export function PopupApp() {
   const [sessions, setSessions] = useState<Session[]>([]);
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const totalTabs = sessions.reduce((sum, s) => sum + s.tabCount, 0);
 
   useEffect(() => {
     chrome.runtime.sendMessage({ type: 'getSessions' }, (response) => {
+      setLoading(false);
       if (response?.success && response.data) {
         setSessions(response.data);
       }
@@ -26,6 +28,18 @@ export function PopupApp() {
   const handleOpenDashboard = () => {
     chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
   };
+
+  if (loading) {
+    return (
+      <div className="w-80 bg-white dark:bg-gray-900 p-4 font-sans">
+        <div className="mb-4 flex items-center gap-2">
+          <span className="text-xl">📋</span>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">ListTab</h1>
+        </div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-80 bg-white dark:bg-gray-900 p-4 font-sans">
@@ -51,19 +65,25 @@ export function PopupApp() {
         </p>
       </div>
 
-      {sessions.slice(0, 3).map((session) => (
-        <div
-          key={session.id}
-          className="mb-2 rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2"
-        >
-          <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">
-            {session.name}
-          </p>
-          <p className="text-xs text-gray-500 dark:text-gray-500">
-            {session.tabCount} tab{session.tabCount !== 1 ? 's' : ''}
-          </p>
-        </div>
-      ))}
+      {sessions.length === 0 ? (
+        <p className="text-center text-sm text-gray-500 dark:text-gray-400 py-4">
+          No saved sessions yet
+        </p>
+      ) : (
+        sessions.slice(0, 3).map((session) => (
+          <div
+            key={session.id}
+            className="mb-2 rounded-lg border border-gray-100 dark:border-gray-800 px-3 py-2"
+          >
+            <p className="truncate text-sm font-medium text-gray-700 dark:text-gray-300">
+              {session.name}
+            </p>
+            <p className="text-xs text-gray-500 dark:text-gray-500">
+              {session.tabCount} tab{session.tabCount !== 1 ? 's' : ''}
+            </p>
+          </div>
+        ))
+      )}
 
       <button
         onClick={handleOpenDashboard}

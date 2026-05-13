@@ -37,7 +37,8 @@ export type MessageType =
   | 'exportSessions'
   | 'importSessions'
   | 'getSettings'
-  | 'updateSettings';
+  | 'updateSettings'
+  | 'removeTabFromSession';
 
 export interface ExtensionMessage {
   type: MessageType;

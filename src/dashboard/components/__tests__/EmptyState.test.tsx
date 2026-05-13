@@ -7,7 +7,9 @@ describe('EmptyState', () => {
   it('should render message and save button', () => {
     render(<EmptyState />);
     expect(screen.getByText(/no tabs saved yet/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /save all tabs/i })
+    ).toBeInTheDocument();
   });
 
   it('should call onSaveAll when button clicked', () => {

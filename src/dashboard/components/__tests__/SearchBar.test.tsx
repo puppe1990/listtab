@@ -19,10 +19,9 @@ describe('SearchBar', () => {
   it('should call onChange when typing', () => {
     const handleChange = vi.fn();
     render(<SearchBar value="" onChange={handleChange} />);
-    fireEvent.change(
-      screen.getByPlaceholderText(/search tabs/i),
-      { target: { value: 'hello' } }
-    );
+    fireEvent.change(screen.getByPlaceholderText(/search tabs/i), {
+      target: { value: 'hello' },
+    });
     expect(handleChange).toHaveBeenCalledWith('hello');
   });
 

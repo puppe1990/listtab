@@ -15,17 +15,13 @@ const mockTab: Tab = {
 
 describe('TabItem', () => {
   it('should render tab title and url', () => {
-    render(
-      <TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />
-    );
+    render(<TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />);
     expect(screen.getByText('GitHub')).toBeInTheDocument();
     expect(screen.getByText('github.com')).toBeInTheDocument();
   });
 
   it('should render favicon', () => {
-    render(
-      <TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />
-    );
+    render(<TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />);
     const img = screen.getByRole('img');
     expect(img).toHaveAttribute('src', mockTab.faviconUrl);
     expect(img).toHaveAttribute('alt', 'GitHub');
@@ -62,9 +58,7 @@ describe('TabItem', () => {
       ...mockTab,
       title: 'A'.repeat(200),
     };
-    render(
-      <TabItem tab={longTab} onRestore={() => {}} onDelete={() => {}} />
-    );
+    render(<TabItem tab={longTab} onRestore={() => {}} onDelete={() => {}} />);
     const title = screen.getByText('A'.repeat(200));
     expect(title.className).toContain('truncate');
   });

@@ -14,7 +14,13 @@ const makeSession = (id: string): Session => ({
   id,
   name: `Session ${id}`,
   tabs: [
-    { id: 't1', title: 'Test', url: 'https://test.com', pinned: false, savedAt: 1 },
+    {
+      id: 't1',
+      title: 'Test',
+      url: 'https://test.com',
+      pinned: false,
+      savedAt: 1,
+    },
   ],
   createdAt: Date.now(),
   tabCount: 1,
@@ -86,7 +92,9 @@ describe('App', () => {
     });
     render(<App />);
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /save all tabs/i })
+      ).toBeInTheDocument();
     });
   });
 
@@ -118,10 +126,7 @@ describe('App', () => {
     vi.mocked(useSessions).mockReturnValue({
       ...createMockUseSessions(),
       loading: false,
-      sessions: [
-        makeSession('github'),
-        makeSession('google'),
-      ],
+      sessions: [makeSession('github'), makeSession('google')],
     });
     render(<App />);
     await waitFor(() => {

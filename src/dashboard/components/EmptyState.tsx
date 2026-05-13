@@ -10,8 +10,8 @@ export function EmptyState({ onSaveAll }: EmptyStateProps) {
         No tabs saved yet
       </h2>
       <p className="mb-6 max-w-sm text-gray-500 dark:text-gray-400">
-        Click the button below or the extension icon in your toolbar to save
-        all open tabs into a session.
+        Click the button below or the extension icon in your toolbar to save all
+        open tabs into a session.
       </p>
       <button
         onClick={onSaveAll}

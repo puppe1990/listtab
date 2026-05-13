@@ -17,7 +17,10 @@ const makeTab = (overrides: Partial<Tab> = {}): Tab => ({
   ...overrides,
 });
 
-const makeSession = (tabs: Tab[] = [], overrides: Partial<Session> = {}): Session => ({
+const makeSession = (
+  tabs: Tab[] = [],
+  overrides: Partial<Session> = {}
+): Session => ({
   id: `session-${Math.random().toString(36).slice(2, 9)}`,
   name: 'Session - May 13',
   tabs,

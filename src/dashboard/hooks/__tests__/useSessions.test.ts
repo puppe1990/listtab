@@ -14,7 +14,13 @@ const makeSession = (id: string): Session => ({
   id,
   name: `Session ${id}`,
   tabs: [
-    { id: 't1', title: 'Tab', url: 'https://example.com', pinned: false, savedAt: 1 },
+    {
+      id: 't1',
+      title: 'Tab',
+      url: 'https://example.com',
+      pinned: false,
+      savedAt: 1,
+    },
   ],
   createdAt: Date.now(),
   tabCount: 1,
@@ -22,12 +28,14 @@ const makeSession = (id: string): Session => ({
 });
 
 function calledWith(type: string, payload?: unknown) {
-  return mockSendMessage.mock.calls.some(
-    (call: unknown[]) => {
-      const msg = call[0] as { type: string; payload?: unknown };
-      return msg.type === type && (payload === undefined || JSON.stringify(msg.payload) === JSON.stringify(payload));
-    }
-  );
+  return mockSendMessage.mock.calls.some((call: unknown[]) => {
+    const msg = call[0] as { type: string; payload?: unknown };
+    return (
+      msg.type === type &&
+      (payload === undefined ||
+        JSON.stringify(msg.payload) === JSON.stringify(payload))
+    );
+  });
 }
 
 describe('useSessions', () => {
@@ -117,7 +125,10 @@ describe('useSessions', () => {
   });
 
   it('should handle rename', async () => {
-    mockSendMessage.mockResolvedValueOnce({ success: true, data: [makeSession('s1')] });
+    mockSendMessage.mockResolvedValueOnce({
+      success: true,
+      data: [makeSession('s1')],
+    });
     mockSendMessage.mockResolvedValueOnce({ success: true });
 
     const { result } = renderHook(() => useSessions());
@@ -127,7 +138,12 @@ describe('useSessions', () => {
       await result.current.renameSession('s1', 'New Name');
     });
 
-    expect(calledWith('updateSession', { sessionId: 's1', updates: { name: 'New Name' } })).toBe(true);
+    expect(
+      calledWith('updateSession', {
+        sessionId: 's1',
+        updates: { name: 'New Name' },
+      })
+    ).toBe(true);
   });
 
   it('should handle toggleStar', async () => {
@@ -142,7 +158,12 @@ describe('useSessions', () => {
       await result.current.toggleStar(s1);
     });
 
-    expect(calledWith('updateSession', { sessionId: 's1', updates: { isStarred: true } })).toBe(true);
+    expect(
+      calledWith('updateSession', {
+        sessionId: 's1',
+        updates: { isStarred: true },
+      })
+    ).toBe(true);
   });
 
   it('should handle export', async () => {
@@ -190,6 +211,8 @@ describe('useSessions', () => {
       await result.current.deleteTab('s1', 't1');
     });
 
-    expect(calledWith('removeTabFromSession', { sessionId: 's1', tabId: 't1' })).toBe(true);
+    expect(
+      calledWith('removeTabFromSession', { sessionId: 's1', tabId: 't1' })
+    ).toBe(true);
   });
 });

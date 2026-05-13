@@ -21,8 +21,6 @@ const mockGetURL = vi.fn((path: string) => `chrome-extension://id/${path}`);
 };
 
 describe('PopupApp', () => {
-  const originalClose = window.close;
-
   beforeEach(() => {
     vi.clearAllMocks();
     vi.stubGlobal('close', vi.fn());
@@ -34,7 +32,9 @@ describe('PopupApp', () => {
 
   it('should render Save All Tabs button', () => {
     render(<PopupApp />);
-    expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /save all tabs/i })
+    ).toBeInTheDocument();
   });
 
   it('should send saveAllTabs message when Save All clicked', async () => {
@@ -62,8 +62,22 @@ describe('PopupApp', () => {
 
   it('should show recent sessions count', async () => {
     const sessions = [
-      { id: 's1', name: 'Session 1', tabs: [], createdAt: 1, tabCount: 0, isStarred: false },
-      { id: 's2', name: 'Session 2', tabs: [], createdAt: 2, tabCount: 0, isStarred: false },
+      {
+        id: 's1',
+        name: 'Session 1',
+        tabs: [],
+        createdAt: 1,
+        tabCount: 0,
+        isStarred: false,
+      },
+      {
+        id: 's2',
+        name: 'Session 2',
+        tabs: [],
+        createdAt: 2,
+        tabCount: 0,
+        isStarred: false,
+      },
     ];
     mockSendMessage.mockImplementationOnce((_msg, callback) => {
       if (callback) callback({ success: true, data: sessions });
@@ -77,8 +91,45 @@ describe('PopupApp', () => {
 
   it('should show total tabs count', async () => {
     const sessions = [
-      { id: 's1', name: 'S1', tabs: [{ id: 't1', title: 'A', url: 'https://a.com', pinned: false, savedAt: 1 }], createdAt: 1, tabCount: 1, isStarred: false },
-      { id: 's2', name: 'S2', tabs: [{ id: 't2', title: 'B', url: 'https://b.com', pinned: false, savedAt: 2 }, { id: 't3', title: 'C', url: 'https://c.com', pinned: false, savedAt: 3 }], createdAt: 2, tabCount: 2, isStarred: false },
+      {
+        id: 's1',
+        name: 'S1',
+        tabs: [
+          {
+            id: 't1',
+            title: 'A',
+            url: 'https://a.com',
+            pinned: false,
+            savedAt: 1,
+          },
+        ],
+        createdAt: 1,
+        tabCount: 1,
+        isStarred: false,
+      },
+      {
+        id: 's2',
+        name: 'S2',
+        tabs: [
+          {
+            id: 't2',
+            title: 'B',
+            url: 'https://b.com',
+            pinned: false,
+            savedAt: 2,
+          },
+          {
+            id: 't3',
+            title: 'C',
+            url: 'https://c.com',
+            pinned: false,
+            savedAt: 3,
+          },
+        ],
+        createdAt: 2,
+        tabCount: 2,
+        isStarred: false,
+      },
     ];
     mockSendMessage.mockImplementationOnce((_msg, callback) => {
       if (callback) callback({ success: true, data: sessions });

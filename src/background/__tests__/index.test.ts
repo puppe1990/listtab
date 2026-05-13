@@ -44,14 +44,26 @@ const mockTabsCreate = vi.fn();
   },
 };
 
-let messageHandler: ((message: ExtensionMessage, _sender: unknown, sendResponse: (r: unknown) => void) => void) | null = null;
+let messageHandler:
+  | ((
+      message: ExtensionMessage,
+      _sender: unknown,
+      sendResponse: (r: unknown) => void
+    ) => void)
+  | null = null;
 
 beforeEach(() => {
   vi.resetModules();
   vi.clearAllMocks();
   messageHandler = null;
   mockOnMessage.addListener.mockImplementation(
-    (handler: (message: ExtensionMessage, _sender: unknown, sendResponse: (r: unknown) => void) => void) => {
+    (
+      handler: (
+        message: ExtensionMessage,
+        _sender: unknown,
+        sendResponse: (r: unknown) => void
+      ) => void
+    ) => {
       messageHandler = handler;
     }
   );
@@ -78,11 +90,7 @@ describe('background/index', () => {
     expect(messageHandler).not.toBeNull();
 
     const sendResponse = vi.fn();
-    messageHandler!(
-      { type: 'saveAllTabs' },
-      {},
-      sendResponse
-    );
+    messageHandler!({ type: 'saveAllTabs' }, {}, sendResponse);
     await flushPromises();
 
     expect(sendResponse).toHaveBeenCalledWith(
@@ -95,11 +103,7 @@ describe('background/index', () => {
     expect(messageHandler).not.toBeNull();
 
     const sendResponse = vi.fn();
-    messageHandler!(
-      { type: 'getSessions' },
-      {},
-      sendResponse
-    );
+    messageHandler!({ type: 'getSessions' }, {}, sendResponse);
     await flushPromises();
 
     expect(sendResponse).toHaveBeenCalledWith(

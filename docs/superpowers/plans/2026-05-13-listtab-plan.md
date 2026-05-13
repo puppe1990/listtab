@@ -13,6 +13,7 @@
 ### Task 1: Project Scaffold
 
 **Files:**
+
 - Create: `package.json`
 - Create: `tsconfig.json`
 - Create: `vite.config.ts`
@@ -102,7 +103,10 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     setupFiles: [],
-    include: ['src/**/__tests__/**/*.test.ts', 'src/**/__tests__/**/*.test.tsx'],
+    include: [
+      'src/**/__tests__/**/*.test.ts',
+      'src/**/__tests__/**/*.test.tsx',
+    ],
   },
   resolve: {
     alias: {
@@ -145,6 +149,7 @@ git init && git add -A && git commit -m "chore: scaffold project with deps and c
 ### Task 2: Shared Types
 
 **Files:**
+
 - Create: `src/shared/types.ts`
 - Create: `src/shared/__tests__/types.test.ts`
 
@@ -296,8 +301,11 @@ describe('types', () => {
 
   it('Session should contain tabs array', () => {
     const tab: Tab = {
-      id: 't1', title: 'Test', url: 'https://test.com',
-      pinned: false, savedAt: 123,
+      id: 't1',
+      title: 'Test',
+      url: 'https://test.com',
+      pinned: false,
+      savedAt: 123,
     };
     const session: Session = {
       id: 's1',
@@ -312,10 +320,16 @@ describe('types', () => {
 
   it('MessageType should include all message types', () => {
     const types: MessageType[] = [
-      'saveAllTabs', 'restoreTab', 'restoreSession',
-      'getSessions', 'deleteSession', 'updateSession',
-      'exportSessions', 'importSessions',
-      'getSettings', 'updateSettings',
+      'saveAllTabs',
+      'restoreTab',
+      'restoreSession',
+      'getSessions',
+      'deleteSession',
+      'updateSession',
+      'exportSessions',
+      'importSessions',
+      'getSettings',
+      'updateSettings',
     ];
     expect(types).toHaveLength(10);
   });
@@ -349,6 +363,7 @@ git commit -m "feat: add shared types (Tab, Session, Settings, Messages)"
 ### Task 3: Shared Constants
 
 **Files:**
+
 - Create: `src/shared/constants.ts`
 - Create: `src/shared/__tests__/constants.test.ts`
 
@@ -447,6 +462,7 @@ git commit -m "feat: add shared constants (formatSessionName, generateId, defaul
 ### Task 4: Shared Storage Helpers
 
 **Files:**
+
 - Create: `src/shared/__tests__/storage.test.ts`
 - Modify: `src/shared/storage.ts`
 
@@ -455,26 +471,36 @@ git commit -m "feat: add shared constants (formatSessionName, generateId, defaul
 ```typescript
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Session } from '../types';
-import { readSessions, writeSessions, readSettings, writeSettings } from '../storage';
+import {
+  readSessions,
+  writeSessions,
+  readSettings,
+  writeSettings,
+} from '../storage';
 import { DEFAULT_SETTINGS, STORAGE_KEY } from '../constants';
 
 const mockStorage: Record<string, unknown> = {};
 const mockChrome = {
   storage: {
     local: {
-      get: vi.fn((keys: string | string[] | null, callback: (result: Record<string, unknown>) => void) => {
-        const result: Record<string, unknown> = {};
-        if (keys === null || keys === undefined) {
-          Object.assign(result, mockStorage);
-        } else if (typeof keys === 'string') {
-          result[keys] = mockStorage[keys];
-        } else if (Array.isArray(keys)) {
-          for (const key of keys) {
-            result[key] = mockStorage[key];
+      get: vi.fn(
+        (
+          keys: string | string[] | null,
+          callback: (result: Record<string, unknown>) => void
+        ) => {
+          const result: Record<string, unknown> = {};
+          if (keys === null || keys === undefined) {
+            Object.assign(result, mockStorage);
+          } else if (typeof keys === 'string') {
+            result[keys] = mockStorage[keys];
+          } else if (Array.isArray(keys)) {
+            for (const key of keys) {
+              result[key] = mockStorage[key];
+            }
           }
+          callback(result);
         }
-        callback(result);
-      }),
+      ),
       set: vi.fn((items: Record<string, unknown>, callback: () => void) => {
         Object.assign(mockStorage, items);
         callback();
@@ -574,7 +600,9 @@ Expected: FAIL (functions not implemented)
 import type { Session, Settings } from './types';
 import { DEFAULT_SETTINGS, STORAGE_KEY } from './constants';
 
-function chromeStorageGet(keys: string | string[] | null): Promise<Record<string, unknown>> {
+function chromeStorageGet(
+  keys: string | string[] | null
+): Promise<Record<string, unknown>> {
   return new Promise((resolve) => {
     chrome.storage.local.get(keys, resolve);
   });
@@ -589,7 +617,7 @@ function chromeStorageSet(items: Record<string, unknown>): Promise<void> {
 export async function readSessions(): Promise<Session[]> {
   const result = await chromeStorageGet(STORAGE_KEY);
   const sessions = result[STORAGE_KEY];
-  return Array.isArray(sessions) ? sessions as Session[] : [];
+  return Array.isArray(sessions) ? (sessions as Session[]) : [];
 }
 
 export async function writeSessions(sessions: Session[]): Promise<void> {
@@ -630,6 +658,7 @@ git commit -m "feat: add storage helpers (read/write sessions and settings)"
 ### Task 5: SessionStore (Background)
 
 **Files:**
+
 - Create: `src/background/__tests__/SessionStore.test.ts`
 - Create: `src/background/SessionStore.ts`
 
@@ -655,7 +684,10 @@ const makeTab = (overrides: Partial<Tab> = {}): Tab => ({
   ...overrides,
 });
 
-const makeSession = (tabs: Tab[] = [], overrides: Partial<Session> = {}): Session => ({
+const makeSession = (
+  tabs: Tab[] = [],
+  overrides: Partial<Session> = {}
+): Session => ({
   id: `session-${Math.random().toString(36).slice(2, 9)}`,
   name: 'Session - May 13',
   tabs,
@@ -884,6 +916,7 @@ git commit -m "feat: add SessionStore with CRUD, sorting, and tab removal"
 ### Task 6: TabManager (Background)
 
 **Files:**
+
 - Create: `src/background/__tests__/TabManager.test.ts`
 - Create: `src/background/TabManager.ts`
 
@@ -900,9 +933,14 @@ function createMockChrome() {
 
   return {
     tabs: {
-      query: vi.fn((_info: chrome.tabs.QueryInfo, cb: (tabs: chrome.tabs.Tab[]) => void) => {
-        cb([...tabs]);
-      }),
+      query: vi.fn(
+        (
+          _info: chrome.tabs.QueryInfo,
+          cb: (tabs: chrome.tabs.Tab[]) => void
+        ) => {
+          cb([...tabs]);
+        }
+      ),
       create: vi.fn((_props: unknown, cb?: (tab: chrome.tabs.Tab) => void) => {
         const newTab = {
           id: createdTabs.length + 1,
@@ -965,22 +1003,42 @@ describe('TabManager', () => {
       tabs: mock.tabs,
     };
     mockStore = { saveSession: vi.fn() };
-    manager = new TabManager(mockStore as unknown as Parameters<TabManager['constructor']>[0]);
+    manager = new TabManager(
+      mockStore as unknown as Parameters<TabManager['constructor']>[0]
+    );
   });
 
   describe('saveAllTabs', () => {
     it('should capture all tabs and create a session', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: false, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'https://google.com', title: 'Google',
+        id: 1,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'https://google.com',
+        title: 'Google',
       });
       mock._addTab({
-        id: 2, index: 1, pinned: false, highlighted: false,
-        windowId: 1, active: false, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'https://github.com', title: 'GitHub',
+        id: 2,
+        index: 1,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: false,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'https://github.com',
+        title: 'GitHub',
       });
 
       const session = await manager.saveAllTabs();
@@ -993,10 +1051,19 @@ describe('TabManager', () => {
 
     it('should close captured tabs after saving', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: false, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'https://example.com', title: 'Example',
+        id: 1,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'https://example.com',
+        title: 'Example',
       });
 
       await manager.saveAllTabs();
@@ -1005,10 +1072,19 @@ describe('TabManager', () => {
 
     it('should not capture pinned tabs', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: true, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'chrome://newtab', title: 'New Tab',
+        id: 1,
+        index: 0,
+        pinned: true,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'chrome://newtab',
+        title: 'New Tab',
       });
 
       const session = await manager.saveAllTabs();
@@ -1017,16 +1093,34 @@ describe('TabManager', () => {
 
     it('should skip chrome:// and chrome-extension:// URLs', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: false, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'chrome://settings', title: 'Settings',
+        id: 1,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'chrome://settings',
+        title: 'Settings',
       });
       mock._addTab({
-        id: 2, index: 1, pinned: false, highlighted: false,
-        windowId: 1, active: false, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
-        url: 'https://valid.com', title: 'Valid',
+        id: 2,
+        index: 1,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: false,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
+        url: 'https://valid.com',
+        title: 'Valid',
       });
 
       const session = await manager.saveAllTabs();
@@ -1036,9 +1130,17 @@ describe('TabManager', () => {
 
     it('should generate faviconUrl from Google S2', async () => {
       mock._addTab({
-        id: 1, index: 0, pinned: false, highlighted: false,
-        windowId: 1, active: true, incognito: false, selected: false,
-        discarded: false, autoDiscardable: true, groupId: -1,
+        id: 1,
+        index: 0,
+        pinned: false,
+        highlighted: false,
+        windowId: 1,
+        active: true,
+        incognito: false,
+        selected: false,
+        discarded: false,
+        autoDiscardable: true,
+        groupId: -1,
         url: 'https://github.com/matheuspuppe',
         title: 'matheuspuppe',
       });
@@ -1075,8 +1177,20 @@ describe('TabManager', () => {
         id: 's1',
         name: 'Test',
         tabs: [
-          { id: 't1', title: 'A', url: 'https://a.com', pinned: false, savedAt: 1 },
-          { id: 't2', title: 'B', url: 'https://b.com', pinned: false, savedAt: 2 },
+          {
+            id: 't1',
+            title: 'A',
+            url: 'https://a.com',
+            pinned: false,
+            savedAt: 1,
+          },
+          {
+            id: 't2',
+            title: 'B',
+            url: 'https://b.com',
+            pinned: false,
+            savedAt: 2,
+          },
         ],
         createdAt: 100,
         tabCount: 2,
@@ -1106,7 +1220,11 @@ Expected: FAIL (TabManager not implemented)
 
 ```typescript
 import type { Tab, Session } from '../shared/types';
-import { generateId, formatSessionName, FAVICON_BASE_URL } from '../shared/constants';
+import {
+  generateId,
+  formatSessionName,
+  FAVICON_BASE_URL,
+} from '../shared/constants';
 import { readSettings } from '../shared/storage';
 
 interface SessionStoreLike {
@@ -1203,6 +1321,7 @@ git commit -m "feat: add TabManager (save, restore, filter tabs)"
 ### Task 7: Background SW Entry Point
 
 **Files:**
+
 - Create: `src/background/__tests__/index.test.ts`
 - Create: `src/background/index.ts`
 
@@ -1261,13 +1380,25 @@ const mockTabsCreate = vi.fn();
   },
 };
 
-let messageHandler: ((message: ExtensionMessage, _sender: unknown, sendResponse: (r: unknown) => void) => void) | null = null;
+let messageHandler:
+  | ((
+      message: ExtensionMessage,
+      _sender: unknown,
+      sendResponse: (r: unknown) => void
+    ) => void)
+  | null = null;
 
 beforeEach(() => {
   vi.clearAllMocks();
   messageHandler = null;
   mockOnMessage.addListener.mockImplementation(
-    (handler: (message: ExtensionMessage, _sender: unknown, sendResponse: (r: unknown) => void) => void) => {
+    (
+      handler: (
+        message: ExtensionMessage,
+        _sender: unknown,
+        sendResponse: (r: unknown) => void
+      ) => void
+    ) => {
       messageHandler = handler;
     }
   );
@@ -1294,11 +1425,7 @@ describe('background/index', () => {
     expect(messageHandler).not.toBeNull();
 
     const sendResponse = vi.fn();
-    await messageHandler!(
-      { type: 'saveAllTabs' },
-      {},
-      sendResponse
-    );
+    await messageHandler!({ type: 'saveAllTabs' }, {}, sendResponse);
 
     expect(sendResponse).toHaveBeenCalledWith(
       expect.objectContaining({ success: true })
@@ -1310,11 +1437,7 @@ describe('background/index', () => {
     expect(messageHandler).not.toBeNull();
 
     const sendResponse = vi.fn();
-    await messageHandler!(
-      { type: 'getSessions' },
-      {},
-      sendResponse
-    );
+    await messageHandler!({ type: 'getSessions' }, {}, sendResponse);
 
     expect(sendResponse).toHaveBeenCalledWith(
       expect.objectContaining({ success: true, data: [] })
@@ -1398,13 +1521,17 @@ async function handleMessage(message: ExtensionMessage) {
       }
 
       case 'restoreTab': {
-        const { tab } = message.payload as { tab: import('../shared/types').Tab };
+        const { tab } = message.payload as {
+          tab: import('../shared/types').Tab;
+        };
         tabManager.restoreTab(tab);
         return { success: true };
       }
 
       case 'restoreSession': {
-        const { session } = message.payload as { session: import('../shared/types').Session };
+        const { session } = message.payload as {
+          session: import('../shared/types').Session;
+        };
         tabManager.restoreSession(session);
         return { success: true };
       }
@@ -1423,7 +1550,9 @@ async function handleMessage(message: ExtensionMessage) {
       case 'updateSession': {
         const { sessionId, updates } = message.payload as {
           sessionId: string;
-          updates: Partial<Pick<import('../shared/types').Session, 'name' | 'isStarred'>>;
+          updates: Partial<
+            Pick<import('../shared/types').Session, 'name' | 'isStarred'>
+          >;
         };
         await sessionStore.updateSession(sessionId, updates);
         return { success: true };
@@ -1435,7 +1564,9 @@ async function handleMessage(message: ExtensionMessage) {
       }
 
       case 'importSessions': {
-        const { sessions } = message.payload as { sessions: import('../shared/types').Session[] };
+        const { sessions } = message.payload as {
+          sessions: import('../shared/types').Session[];
+        };
         for (const session of sessions) {
           await sessionStore.saveSession(session);
         }
@@ -1443,16 +1574,25 @@ async function handleMessage(message: ExtensionMessage) {
       }
 
       case 'removeTabFromSession': {
-        const { sessionId, tabId } = message.payload as { sessionId: string; tabId: string };
+        const { sessionId, tabId } = message.payload as {
+          sessionId: string;
+          tabId: string;
+        };
         await sessionStore.removeTabFromSession(sessionId, tabId);
         return { success: true };
       }
 
       default:
-        return { success: false, error: `Unknown message type: ${(message as { type: string }).type}` };
+        return {
+          success: false,
+          error: `Unknown message type: ${(message as { type: string }).type}`,
+        };
     }
   } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : 'Unknown error' };
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    };
   }
 }
 ```
@@ -1477,6 +1617,7 @@ git commit -m "feat: add background SW entry with message routing and action han
 ### Task 8: EmptyState Component
 
 **Files:**
+
 - Create: `src/dashboard/components/__tests__/EmptyState.test.tsx`
 - Create: `src/dashboard/components/EmptyState.tsx`
 
@@ -1491,12 +1632,16 @@ describe('EmptyState', () => {
   it('should render message and save button', () => {
     render(<EmptyState />);
     expect(screen.getByText(/no tabs saved/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /save all tabs/i })
+    ).toBeInTheDocument();
   });
 
   it('should call onSaveAll when button clicked', async () => {
     const handleSaveAll = vi.fn();
-    const { user } = await renderWithUser(<EmptyState onSaveAll={handleSaveAll} />);
+    const { user } = await renderWithUser(
+      <EmptyState onSaveAll={handleSaveAll} />
+    );
     await user.click(screen.getByRole('button', { name: /save all tabs/i }));
     expect(handleSaveAll).toHaveBeenCalledOnce();
   });
@@ -1519,7 +1664,9 @@ describe('EmptyState', () => {
   it('should render message and save button', () => {
     render(<EmptyState />);
     expect(screen.getByText(/no tabs saved yet/i)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /save all tabs/i })
+    ).toBeInTheDocument();
   });
 
   it('should call onSaveAll when button clicked', () => {
@@ -1559,8 +1706,8 @@ export function EmptyState({ onSaveAll }: EmptyStateProps) {
         No tabs saved yet
       </h2>
       <p className="mb-6 max-w-sm text-gray-500 dark:text-gray-400">
-        Click the button below or the extension icon in your toolbar to save
-        all open tabs into a session.
+        Click the button below or the extension icon in your toolbar to save all
+        open tabs into a session.
       </p>
       <button
         onClick={onSaveAll}
@@ -1593,6 +1740,7 @@ git commit -m "feat: add EmptyState component with save all CTA"
 ### Task 9: TabItem Component
 
 **Files:**
+
 - Create: `src/dashboard/components/__tests__/TabItem.test.tsx`
 - Create: `src/dashboard/components/TabItem.tsx`
 
@@ -1615,17 +1763,13 @@ const mockTab: Tab = {
 
 describe('TabItem', () => {
   it('should render tab title and url', () => {
-    render(
-      <TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />
-    );
+    render(<TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />);
     expect(screen.getByText('GitHub')).toBeInTheDocument();
     expect(screen.getByText('github.com')).toBeInTheDocument();
   });
 
   it('should render favicon', () => {
-    render(
-      <TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />
-    );
+    render(<TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />);
     const img = screen.getByRole('img');
     expect(img).toHaveAttribute('src', mockTab.faviconUrl);
     expect(img).toHaveAttribute('alt', 'GitHub');
@@ -1662,9 +1806,7 @@ describe('TabItem', () => {
       ...mockTab,
       title: 'A'.repeat(200),
     };
-    render(
-      <TabItem tab={longTab} onRestore={() => {}} onDelete={() => {}} />
-    );
+    render(<TabItem tab={longTab} onRestore={() => {}} onDelete={() => {}} />);
     const title = screen.getByText('A'.repeat(200));
     expect(title.className).toContain('truncate');
   });
@@ -1701,11 +1843,17 @@ export function TabItem({ tab, onRestore, onDelete }: TabItemProps) {
           className="h-5 w-5 flex-shrink-0 rounded"
           onError={(e) => {
             (e.target as HTMLImageElement).style.display = 'none';
-            (e.target as HTMLImageElement).nextElementSibling?.classList.remove('hidden');
+            (e.target as HTMLImageElement).nextElementSibling?.classList.remove(
+              'hidden'
+            );
           }}
         />
       ) : null}
-      <span className={`${tab.faviconUrl ? 'hidden' : ''} flex-shrink-0 text-sm`}>🌐</span>
+      <span
+        className={`${tab.faviconUrl ? 'hidden' : ''} flex-shrink-0 text-sm`}
+      >
+        🌐
+      </span>
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
@@ -1722,8 +1870,18 @@ export function TabItem({ tab, onRestore, onDelete }: TabItemProps) {
           title="Restore tab"
           className="rounded p-1.5 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+            />
           </svg>
         </button>
         <button
@@ -1731,8 +1889,18 @@ export function TabItem({ tab, onRestore, onDelete }: TabItemProps) {
           title="Remove from list"
           className="rounded p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M6 18L18 6M6 6l12 12"
+            />
           </svg>
         </button>
       </div>
@@ -1761,6 +1929,7 @@ git commit -m "feat: add TabItem component with restore and delete actions"
 ### Task 10: SessionCard Component
 
 **Files:**
+
 - Create: `src/dashboard/components/__tests__/SessionCard.test.tsx`
 - Create: `src/dashboard/components/SessionCard.tsx`
 
@@ -2015,8 +2184,18 @@ export function SessionCard({
           title="Delete session"
           className="rounded p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
           </svg>
         </button>
       </div>
@@ -2056,6 +2235,7 @@ git commit -m "feat: add SessionCard component with inline rename, star, and act
 ### Task 11: SearchBar Component
 
 **Files:**
+
 - Create: `src/dashboard/components/__tests__/SearchBar.test.tsx`
 - Create: `src/dashboard/components/SearchBar.tsx`
 
@@ -2082,10 +2262,9 @@ describe('SearchBar', () => {
   it('should call onChange when typing', () => {
     const handleChange = vi.fn();
     render(<SearchBar value="" onChange={handleChange} />);
-    fireEvent.change(
-      screen.getByPlaceholderText(/search tabs/i),
-      { target: { value: 'hello' } }
-    );
+    fireEvent.change(screen.getByPlaceholderText(/search tabs/i), {
+      target: { value: 'hello' },
+    });
     expect(handleChange).toHaveBeenCalledWith('hello');
   });
 
@@ -2124,7 +2303,11 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
         stroke="currentColor"
         strokeWidth={2}
       >
-        <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        />
       </svg>
       <input
         type="text"
@@ -2158,6 +2341,7 @@ git commit -m "feat: add SearchBar component"
 ### Task 12: SessionList Component
 
 **Files:**
+
 - Create: `src/dashboard/components/__tests__/SessionList.test.tsx`
 - Create: `src/dashboard/components/SessionList.tsx`
 
@@ -2180,10 +2364,22 @@ const makeSession = (id: string, name: string, tabs: Tab[] = []): Session => ({
 
 const mockSessions: Session[] = [
   makeSession('s1', 'Session A', [
-    { id: 't1', title: 'Tab 1', url: 'https://a.com', pinned: false, savedAt: 1 },
+    {
+      id: 't1',
+      title: 'Tab 1',
+      url: 'https://a.com',
+      pinned: false,
+      savedAt: 1,
+    },
   ]),
   makeSession('s2', 'Session B', [
-    { id: 't2', title: 'Tab 2', url: 'https://b.com', pinned: false, savedAt: 2 },
+    {
+      id: 't2',
+      title: 'Tab 2',
+      url: 'https://b.com',
+      pinned: false,
+      savedAt: 2,
+    },
   ]),
 ];
 
@@ -2316,6 +2512,7 @@ git commit -m "feat: add SessionList component with empty state handling"
 ### Task 13: Toolbar Component
 
 **Files:**
+
 - Create: `src/dashboard/components/__tests__/Toolbar.test.tsx`
 - Create: `src/dashboard/components/Toolbar.tsx`
 
@@ -2338,7 +2535,9 @@ describe('Toolbar', () => {
         hasSessions={false}
       />
     );
-    expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /save all tabs/i })
+    ).toBeInTheDocument();
   });
 
   it('should render restore all and delete all when has sessions', () => {
@@ -2352,8 +2551,12 @@ describe('Toolbar', () => {
         hasSessions={true}
       />
     );
-    expect(screen.getByRole('button', { name: /restore everything/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /delete all/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /restore everything/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /delete all/i })
+    ).toBeInTheDocument();
   });
 
   it('should hide restore/delete when no sessions', () => {
@@ -2367,7 +2570,9 @@ describe('Toolbar', () => {
         hasSessions={false}
       />
     );
-    expect(screen.queryByRole('button', { name: /restore everything/i })).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: /restore everything/i })
+    ).toBeNull();
   });
 
   it('should call onExport when export button clicked', () => {
@@ -2400,7 +2605,18 @@ describe('Toolbar', () => {
     );
 
     const file = new File(
-      [JSON.stringify([{ id: 's1', name: 'Test', tabs: [], createdAt: 1, tabCount: 0, isStarred: false }])],
+      [
+        JSON.stringify([
+          {
+            id: 's1',
+            name: 'Test',
+            tabs: [],
+            createdAt: 1,
+            tabCount: 0,
+            isStarred: false,
+          },
+        ]),
+      ],
       'sessions.json',
       { type: 'application/json' }
     );
@@ -2522,8 +2738,18 @@ export function Toolbar({
           title="Import sessions"
           className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+            />
           </svg>
         </button>
 
@@ -2533,8 +2759,18 @@ export function Toolbar({
           disabled={!hasSessions}
           className="rounded-lg border border-gray-300 dark:border-gray-600 px-3 py-2 text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+          <svg
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+            />
           </svg>
         </button>
       </div>
@@ -2563,6 +2799,7 @@ git commit -m "feat: add Toolbar component with save, restore, delete, export, i
 ### Task 14: useSessions Hook
 
 **Files:**
+
 - Create: `src/dashboard/hooks/__tests__/useSessions.test.ts`
 - Create: `src/dashboard/hooks/useSessions.ts`
 
@@ -2589,7 +2826,13 @@ const makeSession = (id: string): Session => ({
   id,
   name: `Session ${id}`,
   tabs: [
-    { id: 't1', title: 'Tab', url: 'https://example.com', pinned: false, savedAt: 1 },
+    {
+      id: 't1',
+      title: 'Tab',
+      url: 'https://example.com',
+      pinned: false,
+      savedAt: 1,
+    },
   ],
   createdAt: Date.now(),
   tabCount: 1,
@@ -2690,7 +2933,10 @@ describe('useSessions', () => {
   });
 
   it('should handle rename', async () => {
-    mockSendMessage.mockResolvedValueOnce({ success: true, data: [makeSession('s1')] });
+    mockSendMessage.mockResolvedValueOnce({
+      success: true,
+      data: [makeSession('s1')],
+    });
     mockSendMessage.mockResolvedValueOnce({ success: true });
 
     const { result } = renderHook(() => useSessions());
@@ -2743,7 +2989,10 @@ describe('useSessions', () => {
     mockSendMessage
       .mockResolvedValueOnce({ success: true, data: [] })
       .mockResolvedValueOnce({ success: true })
-      .mockResolvedValueOnce({ success: true, data: [makeSession('imported')] });
+      .mockResolvedValueOnce({
+        success: true,
+        data: [makeSession('imported')],
+      });
 
     const { result } = renderHook(() => useSessions());
     await waitFor(() => expect(result.current.loading).toBe(false));
@@ -2825,7 +3074,10 @@ export function useSessions(): UseSessionsReturn {
   const refresh = useCallback(async () => {
     try {
       setError(null);
-      const response = await sendMessage<{ success: boolean; data?: Session[] }>('getSessions');
+      const response = await sendMessage<{
+        success: boolean;
+        data?: Session[];
+      }>('getSessions');
       if (response.success && response.data) {
         setSessions(response.data);
       }
@@ -2850,29 +3102,40 @@ export function useSessions(): UseSessionsReturn {
     }
   }, [refresh]);
 
-  const restoreTab = useCallback(async (tab: Tab, sessionId: string) => {
-    try {
-      await sendMessage('restoreTab', { tab });
-      await sendMessage('removeTabFromSession', { sessionId, tabId: tab.id });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to restore tab');
-    }
-  }, [refresh]);
+  const restoreTab = useCallback(
+    async (tab: Tab, sessionId: string) => {
+      try {
+        await sendMessage('restoreTab', { tab });
+        await sendMessage('removeTabFromSession', { sessionId, tabId: tab.id });
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to restore tab');
+      }
+    },
+    [refresh]
+  );
 
-  const restoreSession = useCallback(async (session: Session) => {
-    try {
-      await sendMessage('restoreSession', { session });
-      await sendMessage('deleteSession', { sessionId: session.id });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to restore session');
-    }
-  }, [refresh]);
+  const restoreSession = useCallback(
+    async (session: Session) => {
+      try {
+        await sendMessage('restoreSession', { session });
+        await sendMessage('deleteSession', { sessionId: session.id });
+        await refresh();
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to restore session'
+        );
+      }
+    },
+    [refresh]
+  );
 
   const restoreAllSessions = useCallback(async () => {
     try {
-      const response = await sendMessage<{ success: boolean; data?: Session[] }>('getSessions');
+      const response = await sendMessage<{
+        success: boolean;
+        data?: Session[];
+      }>('getSessions');
       if (response.success && response.data) {
         for (const session of response.data) {
           await sendMessage('restoreSession', { session });
@@ -2888,18 +3151,26 @@ export function useSessions(): UseSessionsReturn {
     }
   }, [refresh]);
 
-  const deleteSession = useCallback(async (sessionId: string) => {
-    try {
-      await sendMessage('deleteSession', { sessionId });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete session');
-    }
-  }, [refresh]);
+  const deleteSession = useCallback(
+    async (sessionId: string) => {
+      try {
+        await sendMessage('deleteSession', { sessionId });
+        await refresh();
+      } catch (err) {
+        setError(
+          err instanceof Error ? err.message : 'Failed to delete session'
+        );
+      }
+    },
+    [refresh]
+  );
 
   const deleteAllSessions = useCallback(async () => {
     try {
-      const response = await sendMessage<{ success: boolean; data?: Session[] }>('getSessions');
+      const response = await sendMessage<{
+        success: boolean;
+        data?: Session[];
+      }>('getSessions');
       if (response.success && response.data) {
         for (const { id } of response.data) {
           await sendMessage('deleteSession', { sessionId: id });
@@ -2914,7 +3185,9 @@ export function useSessions(): UseSessionsReturn {
   const renameSession = useCallback(async (sessionId: string, name: string) => {
     try {
       await sendMessage('updateSession', { sessionId, updates: { name } });
-      setSessions((prev) => prev.map((s) => (s.id === sessionId ? { ...s, name } : s)));
+      setSessions((prev) =>
+        prev.map((s) => (s.id === sessionId ? { ...s, name } : s))
+      );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to rename');
     }
@@ -2927,7 +3200,9 @@ export function useSessions(): UseSessionsReturn {
         updates: { isStarred: !session.isStarred },
       });
       setSessions((prev) =>
-        prev.map((s) => (s.id === session.id ? { ...s, isStarred: !session.isStarred } : s))
+        prev.map((s) =>
+          s.id === session.id ? { ...s, isStarred: !session.isStarred } : s
+        )
       );
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to update');
@@ -2936,7 +3211,10 @@ export function useSessions(): UseSessionsReturn {
 
   const exportSessions = useCallback(async () => {
     try {
-      const response = await sendMessage<{ success: boolean; data?: Session[] }>('exportSessions');
+      const response = await sendMessage<{
+        success: boolean;
+        data?: Session[];
+      }>('exportSessions');
       if (response.success && response.data) {
         const blob = new Blob([JSON.stringify(response.data, null, 2)], {
           type: 'application/json',
@@ -2953,23 +3231,29 @@ export function useSessions(): UseSessionsReturn {
     }
   }, []);
 
-  const importSessions = useCallback(async (importedSessions: Session[]) => {
-    try {
-      await sendMessage('importSessions', { sessions: importedSessions });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to import');
-    }
-  }, [refresh]);
+  const importSessions = useCallback(
+    async (importedSessions: Session[]) => {
+      try {
+        await sendMessage('importSessions', { sessions: importedSessions });
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to import');
+      }
+    },
+    [refresh]
+  );
 
-  const deleteTab = useCallback(async (sessionId: string, tabId: string) => {
-    try {
-      await sendMessage('removeTabFromSession', { sessionId, tabId });
-      await refresh();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to delete tab');
-    }
-  }, [refresh]);
+  const deleteTab = useCallback(
+    async (sessionId: string, tabId: string) => {
+      try {
+        await sendMessage('removeTabFromSession', { sessionId, tabId });
+        await refresh();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to delete tab');
+      }
+    },
+    [refresh]
+  );
 
   return {
     sessions,
@@ -3011,6 +3295,7 @@ git commit -m "feat: add useSessions hook with full message-based API"
 ### Task 15: Dashboard App + Entry Point
 
 **Files:**
+
 - Create: `src/dashboard/__tests__/App.test.tsx`
 - Create: `src/dashboard/App.tsx`
 - Create: `src/dashboard/main.tsx`
@@ -3034,7 +3319,13 @@ const makeSession = (id: string): Session => ({
   id,
   name: `Session ${id}`,
   tabs: [
-    { id: 't1', title: 'Test', url: 'https://test.com', pinned: false, savedAt: 1 },
+    {
+      id: 't1',
+      title: 'Test',
+      url: 'https://test.com',
+      pinned: false,
+      savedAt: 1,
+    },
   ],
   createdAt: Date.now(),
   tabCount: 1,
@@ -3106,7 +3397,9 @@ describe('App', () => {
     });
     render(<App />);
     await waitFor(() => {
-      expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole('button', { name: /save all tabs/i })
+      ).toBeInTheDocument();
     });
   });
 
@@ -3267,15 +3560,15 @@ if (root) {
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ListTab</title>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="./main.tsx"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ListTab</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
 </html>
 ```
 
@@ -3299,12 +3592,13 @@ git commit -m "feat: add dashboard App, entry point, and HTML shell"
 ### Task 16: Tailwind CSS Entry
 
 **Files:**
+
 - Create: `src/dashboard/index.css`
 
 - [ ] **Step 1: Write the CSS file**
 
 ```css
-@import "tailwindcss";
+@import 'tailwindcss';
 ```
 
 Alternatively for Tailwind v4 via Vite plugin, this is all we need. No separate config file required unless customizing the theme.
@@ -3321,6 +3615,7 @@ git commit -m "feat: add tailwindcss entry point"
 ### Task 17: Popup
 
 **Files:**
+
 - Create: `src/popup/__tests__/PopupApp.test.tsx`
 - Create: `src/popup/PopupApp.tsx`
 - Create: `src/popup/main.tsx`
@@ -3352,7 +3647,9 @@ describe('PopupApp', () => {
   it('should render Save All Tabs button', () => {
     mockSendMessage.mockResolvedValueOnce({ success: true, data: [] });
     render(<PopupApp />);
-    expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /save all tabs/i })
+    ).toBeInTheDocument();
   });
 
   it('should render Open Dashboard button', () => {
@@ -3365,13 +3662,29 @@ describe('PopupApp', () => {
     mockSendMessage.mockResolvedValueOnce({ success: true, data: [] });
     render(<PopupApp />);
     fireEvent.click(screen.getByText(/open full dashboard/i));
-    expect((globalThis as Record<string, unknown>).chrome.tabs.create).toHaveBeenCalled();
+    expect(
+      (globalThis as Record<string, unknown>).chrome.tabs.create
+    ).toHaveBeenCalled();
   });
 
   it('should show recent sessions count', async () => {
     const sessions = [
-      { id: 's1', name: 'Session 1', tabs: [], createdAt: 1, tabCount: 0, isStarred: false },
-      { id: 's2', name: 'Session 2', tabs: [], createdAt: 2, tabCount: 0, isStarred: false },
+      {
+        id: 's1',
+        name: 'Session 1',
+        tabs: [],
+        createdAt: 1,
+        tabCount: 0,
+        isStarred: false,
+      },
+      {
+        id: 's2',
+        name: 'Session 2',
+        tabs: [],
+        createdAt: 2,
+        tabCount: 0,
+        isStarred: false,
+      },
     ];
     mockSendMessage.mockResolvedValueOnce({ success: true, data: sessions });
     render(<PopupApp />);
@@ -3382,8 +3695,45 @@ describe('PopupApp', () => {
 
   it('should show total tabs count', async () => {
     const sessions = [
-      { id: 's1', name: 'S1', tabs: [{ id: 't1', title: 'A', url: 'https://a.com', pinned: false, savedAt: 1 }], createdAt: 1, tabCount: 1, isStarred: false },
-      { id: 's2', name: 'S2', tabs: [{ id: 't2', title: 'B', url: 'https://b.com', pinned: false, savedAt: 2 }, { id: 't3', title: 'C', url: 'https://c.com', pinned: false, savedAt: 3 }], createdAt: 2, tabCount: 2, isStarred: false },
+      {
+        id: 's1',
+        name: 'S1',
+        tabs: [
+          {
+            id: 't1',
+            title: 'A',
+            url: 'https://a.com',
+            pinned: false,
+            savedAt: 1,
+          },
+        ],
+        createdAt: 1,
+        tabCount: 1,
+        isStarred: false,
+      },
+      {
+        id: 's2',
+        name: 'S2',
+        tabs: [
+          {
+            id: 't2',
+            title: 'B',
+            url: 'https://b.com',
+            pinned: false,
+            savedAt: 2,
+          },
+          {
+            id: 't3',
+            title: 'C',
+            url: 'https://c.com',
+            pinned: false,
+            savedAt: 3,
+          },
+        ],
+        createdAt: 2,
+        tabCount: 2,
+        isStarred: false,
+      },
     ];
     mockSendMessage.mockResolvedValueOnce({ success: true, data: sessions });
     render(<PopupApp />);
@@ -3438,7 +3788,9 @@ export function PopupApp() {
     <div className="w-80 bg-white dark:bg-gray-900 p-4 font-sans">
       <div className="mb-4 flex items-center gap-2">
         <span className="text-xl">📋</span>
-        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">ListTab</h1>
+        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          ListTab
+        </h1>
       </div>
 
       <button
@@ -3451,10 +3803,16 @@ export function PopupApp() {
 
       <div className="mb-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-semibold text-gray-900 dark:text-gray-100">{sessions.length}</span> session{sessions.length !== 1 ? 's' : ''}
+          <span className="font-semibold text-gray-900 dark:text-gray-100">
+            {sessions.length}
+          </span>{' '}
+          session{sessions.length !== 1 ? 's' : ''}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-semibold text-gray-900 dark:text-gray-100">{totalTabs}</span> tabs saved
+          <span className="font-semibold text-gray-900 dark:text-gray-100">
+            {totalTabs}
+          </span>{' '}
+          tabs saved
         </p>
       </div>
 
@@ -3506,15 +3864,15 @@ if (root) {
 ```html
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ListTab</title>
-</head>
-<body>
-  <div id="root"></div>
-  <script type="module" src="./main.tsx"></script>
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ListTab</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="./main.tsx"></script>
+  </body>
 </html>
 ```
 
@@ -3538,6 +3896,7 @@ git commit -m "feat: add popup with save all, stats, recent sessions, and dashbo
 ### Task 18: Vite Configuration for CRXJS
 
 **Files:**
+
 - Modify: `vite.config.ts`
 
 - [ ] **Step 1: Update vite.config.ts**
@@ -3551,11 +3910,7 @@ import path from 'path';
 import manifest from './manifest.json';
 
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-    crx({ manifest }),
-  ],
+  plugins: [react(), tailwindcss(), crx({ manifest })],
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, 'src/shared'),
@@ -3578,6 +3933,7 @@ git commit -m "feat: configure Vite with CRXJS, React, and Tailwind plugins"
 ### Task 19: Manifest and Icons
 
 **Files:**
+
 - Create: `manifest.json` (root)
 - Create placeholder icons in `public/icons/`
 
@@ -3648,6 +4004,7 @@ git commit -m "feat: add manifest.json and extension icons"
 ### Task 20: Final Integration Verification
 
 **Files:**
+
 - None new — verification only
 
 - [ ] **Step 1: Run all tests**
@@ -3686,25 +4043,25 @@ git add -A && git diff --cached --exit-code || git commit -m "chore: final fixes
 
 **20 tasks** covering the full Chrome extension:
 
-| Task | Component | TDD? |
-|------|-----------|------|
-| 1 | Project scaffold | Setup |
-| 2 | Shared types | Yes |
-| 3 | Shared constants | Yes |
-| 4 | Storage helpers | Yes |
-| 5 | SessionStore | Yes |
-| 6 | TabManager | Yes |
-| 7 | Background SW entry | Yes |
-| 8 | EmptyState | Yes |
-| 9 | TabItem | Yes |
-| 10 | SessionCard | Yes |
-| 11 | SearchBar | Yes |
-| 12 | SessionList | Yes |
-| 13 | Toolbar | Yes |
-| 14 | useSessions hook | Yes |
-| 15 | App + entry point | Yes |
-| 16 | Tailwind CSS | Setup |
-| 17 | Popup | Yes |
-| 18 | Vite + CRXJS config | Setup |
-| 19 | Manifest + icons | Setup |
-| 20 | Integration verification | QA |
+| Task | Component                | TDD?  |
+| ---- | ------------------------ | ----- |
+| 1    | Project scaffold         | Setup |
+| 2    | Shared types             | Yes   |
+| 3    | Shared constants         | Yes   |
+| 4    | Storage helpers          | Yes   |
+| 5    | SessionStore             | Yes   |
+| 6    | TabManager               | Yes   |
+| 7    | Background SW entry      | Yes   |
+| 8    | EmptyState               | Yes   |
+| 9    | TabItem                  | Yes   |
+| 10   | SessionCard              | Yes   |
+| 11   | SearchBar                | Yes   |
+| 12   | SessionList              | Yes   |
+| 13   | Toolbar                  | Yes   |
+| 14   | useSessions hook         | Yes   |
+| 15   | App + entry point        | Yes   |
+| 16   | Tailwind CSS             | Setup |
+| 17   | Popup                    | Yes   |
+| 18   | Vite + CRXJS config      | Setup |
+| 19   | Manifest + icons         | Setup |
+| 20   | Integration verification | QA    |

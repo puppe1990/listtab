@@ -1,25 +1,35 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import type { Session } from '../types';
-import { readSessions, writeSessions, readSettings, writeSettings } from '../storage';
+import {
+  readSessions,
+  writeSessions,
+  readSettings,
+  writeSettings,
+} from '../storage';
 import { DEFAULT_SETTINGS, STORAGE_KEY } from '../constants';
 
 const mockStorage: Record<string, unknown> = {};
 const mockChrome = {
   storage: {
     local: {
-      get: vi.fn((keys: string | string[] | null, callback: (result: Record<string, unknown>) => void) => {
-        const result: Record<string, unknown> = {};
-        if (keys === null || keys === undefined) {
-          Object.assign(result, mockStorage);
-        } else if (typeof keys === 'string') {
-          result[keys] = mockStorage[keys];
-        } else if (Array.isArray(keys)) {
-          for (const key of keys) {
-            result[key] = mockStorage[key];
+      get: vi.fn(
+        (
+          keys: string | string[] | null,
+          callback: (result: Record<string, unknown>) => void
+        ) => {
+          const result: Record<string, unknown> = {};
+          if (keys === null || keys === undefined) {
+            Object.assign(result, mockStorage);
+          } else if (typeof keys === 'string') {
+            result[keys] = mockStorage[keys];
+          } else if (Array.isArray(keys)) {
+            for (const key of keys) {
+              result[key] = mockStorage[key];
+            }
           }
+          callback(result);
         }
-        callback(result);
-      }),
+      ),
       set: vi.fn((items: Record<string, unknown>, callback: () => void) => {
         Object.assign(mockStorage, items);
         callback();

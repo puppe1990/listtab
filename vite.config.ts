@@ -6,11 +6,7 @@ import path from 'path';
 import manifest from './manifest.json';
 
 export default defineConfig({
-  plugins: [
-    react(),
-    tailwindcss(),
-    crx({ manifest }),
-  ],
+  plugins: [react(), tailwindcss(), crx({ manifest })],
   resolve: {
     alias: {
       '@shared': path.resolve(__dirname, 'src/shared'),

@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import type { Tab, Session, Settings, AppState, MessageType } from '../types';
+import type { Tab, Session, Settings, MessageType } from '../types';
 
 describe('types', () => {
   it('Tab should accept valid object with required fields', () => {
@@ -27,8 +27,11 @@ describe('types', () => {
 
   it('Session should contain tabs array', () => {
     const tab: Tab = {
-      id: 't1', title: 'Test', url: 'https://test.com',
-      pinned: false, savedAt: 123,
+      id: 't1',
+      title: 'Test',
+      url: 'https://test.com',
+      pinned: false,
+      savedAt: 123,
     };
     const session: Session = {
       id: 's1',
@@ -43,10 +46,16 @@ describe('types', () => {
 
   it('MessageType should include all message types', () => {
     const types: MessageType[] = [
-      'saveAllTabs', 'restoreTab', 'restoreSession',
-      'getSessions', 'deleteSession', 'updateSession',
-      'exportSessions', 'importSessions',
-      'getSettings', 'updateSettings',
+      'saveAllTabs',
+      'restoreTab',
+      'restoreSession',
+      'getSessions',
+      'deleteSession',
+      'updateSession',
+      'exportSessions',
+      'importSessions',
+      'getSettings',
+      'updateSettings',
     ];
     expect(types).toHaveLength(10);
   });

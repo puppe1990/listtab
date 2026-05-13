@@ -1,7 +1,9 @@
 import type { Session, Settings } from './types';
 import { DEFAULT_SETTINGS, STORAGE_KEY } from './constants';
 
-function chromeStorageGet(keys: string | string[] | null): Promise<Record<string, unknown>> {
+function chromeStorageGet(
+  keys: string | string[] | null
+): Promise<Record<string, unknown>> {
   return new Promise((resolve) => {
     const normalized = typeof keys === 'string' ? [keys] : keys;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -18,7 +20,7 @@ function chromeStorageSet(items: Record<string, unknown>): Promise<void> {
 export async function readSessions(): Promise<Session[]> {
   const result = await chromeStorageGet(STORAGE_KEY);
   const sessions = result[STORAGE_KEY];
-  return Array.isArray(sessions) ? sessions as Session[] : [];
+  return Array.isArray(sessions) ? (sessions as Session[]) : [];
 }
 
 export async function writeSessions(sessions: Session[]): Promise<void> {

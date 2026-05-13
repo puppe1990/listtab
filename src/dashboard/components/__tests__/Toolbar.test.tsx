@@ -15,7 +15,9 @@ describe('Toolbar', () => {
         hasSessions={false}
       />
     );
-    expect(screen.getByRole('button', { name: /save all tabs/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /save all tabs/i })
+    ).toBeInTheDocument();
   });
 
   it('should render restore all and delete all when has sessions', () => {
@@ -29,8 +31,12 @@ describe('Toolbar', () => {
         hasSessions={true}
       />
     );
-    expect(screen.getByRole('button', { name: /restore everything/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /delete all/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /restore everything/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /delete all/i })
+    ).toBeInTheDocument();
   });
 
   it('should hide restore/delete when no sessions', () => {
@@ -44,7 +50,9 @@ describe('Toolbar', () => {
         hasSessions={false}
       />
     );
-    expect(screen.queryByRole('button', { name: /restore everything/i })).toBeNull();
+    expect(
+      screen.queryByRole('button', { name: /restore everything/i })
+    ).toBeNull();
     expect(screen.queryByRole('button', { name: /delete all/i })).toBeNull();
   });
 
@@ -78,7 +86,18 @@ describe('Toolbar', () => {
     );
 
     const file = new File(
-      [JSON.stringify([{ id: 's1', name: 'Test', tabs: [], createdAt: 1, tabCount: 0, isStarred: false }])],
+      [
+        JSON.stringify([
+          {
+            id: 's1',
+            name: 'Test',
+            tabs: [],
+            createdAt: 1,
+            tabCount: 0,
+            isStarred: false,
+          },
+        ]),
+      ],
       'sessions.json',
       { type: 'application/json' }
     );
@@ -119,7 +138,9 @@ describe('Toolbar', () => {
         hasSessions={true}
       />
     );
-    fireEvent.click(screen.getByRole('button', { name: /restore everything/i }));
+    fireEvent.click(
+      screen.getByRole('button', { name: /restore everything/i })
+    );
     expect(handleRestoreAll).toHaveBeenCalledOnce();
   });
 

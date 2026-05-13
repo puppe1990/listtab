@@ -35,9 +35,13 @@ export function PopupApp() {
       <div className="w-80 bg-white dark:bg-gray-900 p-4 font-sans">
         <div className="mb-4 flex items-center gap-2">
           <span className="text-xl">📋</span>
-          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">ListTab</h1>
+          <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+            ListTab
+          </h1>
         </div>
-        <div className="text-center py-8 text-gray-500 dark:text-gray-400">Loading...</div>
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          Loading...
+        </div>
       </div>
     );
   }
@@ -46,7 +50,9 @@ export function PopupApp() {
     <div className="w-80 bg-white dark:bg-gray-900 p-4 font-sans">
       <div className="mb-4 flex items-center gap-2">
         <span className="text-xl">📋</span>
-        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">ListTab</h1>
+        <h1 className="text-lg font-bold text-gray-900 dark:text-gray-100">
+          ListTab
+        </h1>
       </div>
 
       <button
@@ -59,10 +65,16 @@ export function PopupApp() {
 
       <div className="mb-3 rounded-lg border border-gray-200 dark:border-gray-700 p-3">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-semibold text-gray-900 dark:text-gray-100">{sessions.length}</span> session{sessions.length !== 1 ? 's' : ''}
+          <span className="font-semibold text-gray-900 dark:text-gray-100">
+            {sessions.length}
+          </span>{' '}
+          session{sessions.length !== 1 ? 's' : ''}
         </p>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          <span className="font-semibold text-gray-900 dark:text-gray-100">{totalTabs}</span> tabs saved
+          <span className="font-semibold text-gray-900 dark:text-gray-100">
+            {totalTabs}
+          </span>{' '}
+          tabs saved
         </p>
       </div>
 

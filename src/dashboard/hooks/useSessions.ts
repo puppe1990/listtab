@@ -1,14 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import type { Session, Tab } from '../../shared/types';
+import type { Session, Tab, MessageType } from '../../shared/types';
 
-function sendMessage<T = unknown>(type: string, payload?: unknown): Promise<T> {
-  return new Promise((resolve) => {
-    const result = chrome.runtime.sendMessage({ type, payload }, resolve);
-    const maybePromise = result as Promise<T> | undefined;
-    if (maybePromise && typeof maybePromise.then === 'function') {
-      maybePromise.then(resolve);
-    }
-  });
+function sendMessage<T = unknown>(type: MessageType, payload?: unknown): Promise<T> {
+  return chrome.runtime.sendMessage({ type, payload }) as Promise<T>;
 }
 
 interface UseSessionsReturn {
@@ -64,6 +58,7 @@ export function useSessions(): UseSessionsReturn {
 
   const restoreTab = useCallback(async (tab: Tab, sessionId: string) => {
     try {
+      setError(null);
       await sendMessage('restoreTab', { tab });
       await sendMessage('removeTabFromSession', { sessionId, tabId: tab.id });
       await refresh();
@@ -74,6 +69,7 @@ export function useSessions(): UseSessionsReturn {
 
   const restoreSession = useCallback(async (session: Session) => {
     try {
+      setError(null);
       await sendMessage('restoreSession', { session });
       await sendMessage('deleteSession', { sessionId: session.id });
       await refresh();
@@ -84,23 +80,23 @@ export function useSessions(): UseSessionsReturn {
 
   const restoreAllSessions = useCallback(async () => {
     try {
-      const response = await sendMessage<{ success: boolean; data?: Session[] }>('getSessions');
-      if (response.success && response.data) {
-        for (const session of response.data) {
-          await sendMessage('restoreSession', { session });
-        }
-        for (const { id } of response.data) {
-          await sendMessage('deleteSession', { sessionId: id });
-        }
+      setError(null);
+      const currentSessions = sessions;
+      for (const session of currentSessions) {
+        await sendMessage('restoreSession', { session });
+      }
+      for (const { id } of currentSessions) {
+        await sendMessage('deleteSession', { sessionId: id });
       }
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to restore all');
     }
-  }, [refresh]);
+  }, [sessions, refresh]);
 
   const deleteSession = useCallback(async (sessionId: string) => {
     try {
+      setError(null);
       await sendMessage('deleteSession', { sessionId });
       await refresh();
     } catch (err) {
@@ -110,43 +106,49 @@ export function useSessions(): UseSessionsReturn {
 
   const deleteAllSessions = useCallback(async () => {
     try {
-      const response = await sendMessage<{ success: boolean; data?: Session[] }>('getSessions');
-      if (response.success && response.data) {
-        for (const { id } of response.data) {
-          await sendMessage('deleteSession', { sessionId: id });
-        }
+      setError(null);
+      const currentSessions = sessions;
+      for (const { id } of currentSessions) {
+        await sendMessage('deleteSession', { sessionId: id });
       }
       await refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to delete all');
     }
-  }, [refresh]);
+  }, [sessions, refresh]);
 
   const renameSession = useCallback(async (sessionId: string, name: string) => {
+    const prevSessions = sessions;
     try {
-      await sendMessage('updateSession', { sessionId, updates: { name } });
+      setError(null);
       setSessions((prev) => prev.map((s) => (s.id === sessionId ? { ...s, name } : s)));
+      await sendMessage('updateSession', { sessionId, updates: { name } });
     } catch (err) {
+      setSessions(prevSessions);
       setError(err instanceof Error ? err.message : 'Failed to rename');
     }
-  }, []);
+  }, [sessions]);
 
   const toggleStar = useCallback(async (session: Session) => {
+    const prevSessions = sessions;
     try {
+      setError(null);
+      setSessions((prev) =>
+        prev.map((s) => (s.id === session.id ? { ...s, isStarred: !s.isStarred } : s))
+      );
       await sendMessage('updateSession', {
         sessionId: session.id,
         updates: { isStarred: !session.isStarred },
       });
-      setSessions((prev) =>
-        prev.map((s) => (s.id === session.id ? { ...s, isStarred: !session.isStarred } : s))
-      );
     } catch (err) {
+      setSessions(prevSessions);
       setError(err instanceof Error ? err.message : 'Failed to update');
     }
-  }, []);
+  }, [sessions]);
 
   const exportSessions = useCallback(async () => {
     try {
+      setError(null);
       const response = await sendMessage<{ success: boolean; data?: Session[] }>('exportSessions');
       if (response.success && response.data) {
         const blob = new Blob([JSON.stringify(response.data, null, 2)], {
@@ -166,6 +168,7 @@ export function useSessions(): UseSessionsReturn {
 
   const importSessions = useCallback(async (importedSessions: Session[]) => {
     try {
+      setError(null);
       await sendMessage('importSessions', { sessions: importedSessions });
       await refresh();
     } catch (err) {
@@ -175,6 +178,7 @@ export function useSessions(): UseSessionsReturn {
 
   const deleteTab = useCallback(async (sessionId: string, tabId: string) => {
     try {
+      setError(null);
       await sendMessage('removeTabFromSession', { sessionId, tabId });
       await refresh();
     } catch (err) {

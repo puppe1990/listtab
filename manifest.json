@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "ListTab",
+  "version": "1.0.0",
+  "description": "Save all open tabs into a list. Restore them individually or all at once.",
+  "permissions": ["tabs", "storage"],
+  "action": {
+    "default_title": "ListTab",
+    "default_popup": "src/popup/index.html"
+  },
+  "background": {
+    "service_worker": "src/background/index.ts",
+    "type": "module"
+  },
+  "icons": {
+    "16": "public/icons/icon16.png",
+    "48": "public/icons/icon48.png",
+    "128": "public/icons/icon128.png"
+  }
+}

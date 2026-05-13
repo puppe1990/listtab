@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Session, Tab } from '../../shared/types';
 import { TabItem } from './TabItem';
 
@@ -24,12 +24,22 @@ export function SessionCard({
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(session.name);
 
+  useEffect(() => {
+    setEditName(session.name);
+  }, [session.name]);
+
   const handleBlur = () => {
     setIsEditing(false);
     if (editName.trim() && editName !== session.name) {
       onRename(session, editName.trim());
     } else {
       setEditName(session.name);
+    }
+  };
+
+  const handleDelete = () => {
+    if (window.confirm(`Delete "${session.name}" and all its tabs?`)) {
+      onDeleteSession(session);
     }
   };
 
@@ -82,7 +92,7 @@ export function SessionCard({
         </button>
 
         <button
-          onClick={() => onDeleteSession(session)}
+          onClick={handleDelete}
           title="Delete session"
           className="rounded p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/30 transition-colors"
         >

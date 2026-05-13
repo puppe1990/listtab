@@ -74,6 +74,7 @@ describe('SessionCard', () => {
   });
 
   it('should call onDeleteSession when delete button clicked', () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
     const handleDelete = vi.fn();
     render(
       <SessionCard
@@ -88,6 +89,7 @@ describe('SessionCard', () => {
     );
     fireEvent.click(screen.getByTitle('Delete session'));
     expect(handleDelete).toHaveBeenCalledWith(mockSession);
+    vi.restoreAllMocks();
   });
 
   it('should show star filled when session is starred', () => {

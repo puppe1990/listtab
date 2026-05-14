@@ -21,13 +21,17 @@ export function PopupApp() {
     setSaving(true);
     chrome.runtime.sendMessage({ type: 'saveAllTabs' }, () => {
       setSaving(false);
-      chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+      chrome.tabs.create({
+        url: chrome.runtime.getURL('src/dashboard/index.html'),
+      });
       window.close();
     });
   };
 
   const handleOpenDashboard = () => {
-    chrome.tabs.create({ url: chrome.runtime.getURL('dashboard.html') });
+    chrome.tabs.create({
+      url: chrome.runtime.getURL('src/dashboard/index.html'),
+    });
   };
 
   if (loading) {

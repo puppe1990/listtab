@@ -15,13 +15,29 @@ const mockTab: Tab = {
 
 describe('TabItem', () => {
   it('should render tab title and url', () => {
-    render(<TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />);
+    render(
+      <TabItem
+        tab={mockTab}
+        onRestore={() => {}}
+        onDelete={() => {}}
+        onToggleSelect={() => {}}
+        isSelected={false}
+      />
+    );
     expect(screen.getByText('GitHub')).toBeInTheDocument();
     expect(screen.getByText('github.com')).toBeInTheDocument();
   });
 
   it('should render favicon', () => {
-    render(<TabItem tab={mockTab} onRestore={() => {}} onDelete={() => {}} />);
+    render(
+      <TabItem
+        tab={mockTab}
+        onRestore={() => {}}
+        onDelete={() => {}}
+        onToggleSelect={() => {}}
+        isSelected={false}
+      />
+    );
     const img = screen.getByRole('img');
     expect(img).toHaveAttribute('src', mockTab.faviconUrl);
     expect(img).toHaveAttribute('alt', 'GitHub');
@@ -30,7 +46,13 @@ describe('TabItem', () => {
   it('should show fallback icon when no faviconUrl', () => {
     const tabNoIcon: Tab = { ...mockTab, faviconUrl: undefined };
     render(
-      <TabItem tab={tabNoIcon} onRestore={() => {}} onDelete={() => {}} />
+      <TabItem
+        tab={tabNoIcon}
+        onRestore={() => {}}
+        onDelete={() => {}}
+        onToggleSelect={() => {}}
+        isSelected={false}
+      />
     );
     expect(screen.getByText('🌐')).toBeInTheDocument();
   });
@@ -38,7 +60,13 @@ describe('TabItem', () => {
   it('should call onRestore when restore button clicked', () => {
     const handleRestore = vi.fn();
     render(
-      <TabItem tab={mockTab} onRestore={handleRestore} onDelete={() => {}} />
+      <TabItem
+        tab={mockTab}
+        onRestore={handleRestore}
+        onDelete={() => {}}
+        onToggleSelect={() => {}}
+        isSelected={false}
+      />
     );
     fireEvent.click(screen.getByTitle('Restore tab'));
     expect(handleRestore).toHaveBeenCalledWith(mockTab);
@@ -47,7 +75,13 @@ describe('TabItem', () => {
   it('should call onDelete when delete button clicked', () => {
     const handleDelete = vi.fn();
     render(
-      <TabItem tab={mockTab} onRestore={() => {}} onDelete={handleDelete} />
+      <TabItem
+        tab={mockTab}
+        onRestore={() => {}}
+        onDelete={handleDelete}
+        onToggleSelect={() => {}}
+        isSelected={false}
+      />
     );
     fireEvent.click(screen.getByTitle('Remove from list'));
     expect(handleDelete).toHaveBeenCalledWith(mockTab);
@@ -58,8 +92,74 @@ describe('TabItem', () => {
       ...mockTab,
       title: 'A'.repeat(200),
     };
-    render(<TabItem tab={longTab} onRestore={() => {}} onDelete={() => {}} />);
+    render(
+      <TabItem
+        tab={longTab}
+        onRestore={() => {}}
+        onDelete={() => {}}
+        onToggleSelect={() => {}}
+        isSelected={false}
+      />
+    );
     const title = screen.getByText('A'.repeat(200));
     expect(title.className).toContain('truncate');
+  });
+
+  it('should render a checkbox', () => {
+    render(
+      <TabItem
+        tab={mockTab}
+        onRestore={() => {}}
+        onDelete={() => {}}
+        onToggleSelect={() => {}}
+        isSelected={false}
+      />
+    );
+    expect(screen.getByRole('checkbox')).toBeInTheDocument();
+  });
+
+  it('should check checkbox when isSelected is true', () => {
+    render(
+      <TabItem
+        tab={mockTab}
+        onRestore={() => {}}
+        onDelete={() => {}}
+        onToggleSelect={() => {}}
+        isSelected={true}
+      />
+    );
+    expect(screen.getByRole('checkbox')).toBeChecked();
+  });
+
+  it('should call onToggleSelect when checkbox clicked', () => {
+    const handleToggle = vi.fn();
+    render(
+      <TabItem
+        tab={mockTab}
+        onRestore={() => {}}
+        onDelete={() => {}}
+        onToggleSelect={handleToggle}
+        isSelected={false}
+      />
+    );
+    fireEvent.click(screen.getByRole('checkbox'));
+    expect(handleToggle).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not call onRestore or onDelete when checkbox clicked', () => {
+    const handleRestore = vi.fn();
+    const handleDelete = vi.fn();
+    render(
+      <TabItem
+        tab={mockTab}
+        onRestore={handleRestore}
+        onDelete={handleDelete}
+        onToggleSelect={() => {}}
+        isSelected={false}
+      />
+    );
+    fireEvent.click(screen.getByRole('checkbox'));
+    expect(handleRestore).not.toHaveBeenCalled();
+    expect(handleDelete).not.toHaveBeenCalled();
   });
 });

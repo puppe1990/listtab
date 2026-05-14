@@ -24,6 +24,9 @@ export function App() {
   } = useSessions();
 
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedTabIdsBySession, setSelectedTabIdsBySession] = useState<
+    Map<string, string[]>
+  >(new Map());
 
   const filteredSessions = useMemo(() => {
     if (!searchQuery.trim()) return sessions;
@@ -64,6 +67,83 @@ export function App() {
       renameSession(session.id, newName);
     },
     [renameSession]
+  );
+
+  const handleToggleTabSelect = useCallback(
+    (sessionId: string, tabId: string) => {
+      setSelectedTabIdsBySession((prev) => {
+        const next = new Map(prev);
+        const current = next.get(sessionId) ?? [];
+        if (current.includes(tabId)) {
+          const filtered = current.filter((id) => id !== tabId);
+          if (filtered.length === 0) {
+            next.delete(sessionId);
+          } else {
+            next.set(sessionId, filtered);
+          }
+        } else {
+          next.set(sessionId, [...current, tabId]);
+        }
+        return next;
+      });
+    },
+    []
+  );
+
+  const handleSelectAllTabs = useCallback(
+    (sessionId: string) => {
+      const session = sessions.find((s) => s.id === sessionId);
+      if (!session) return;
+      setSelectedTabIdsBySession((prev) => {
+        const next = new Map(prev);
+        const current = next.get(sessionId) ?? [];
+        if (current.length === session.tabs.length) {
+          next.delete(sessionId);
+        } else {
+          next.set(
+            sessionId,
+            session.tabs.map((t) => t.id)
+          );
+        }
+        return next;
+      });
+    },
+    [sessions]
+  );
+
+  const handleRestoreSelected = useCallback(
+    async (sessionId: string) => {
+      const session = sessions.find((s) => s.id === sessionId);
+      if (!session) return;
+      const selectedIds = selectedTabIdsBySession.get(sessionId) ?? [];
+      const tabsToRestore = session.tabs.filter((t) =>
+        selectedIds.includes(t.id)
+      );
+      for (const tab of tabsToRestore) {
+        await restoreTab(tab, sessionId);
+      }
+      setSelectedTabIdsBySession((prev) => {
+        const next = new Map(prev);
+        next.delete(sessionId);
+        return next;
+      });
+    },
+    [sessions, selectedTabIdsBySession, restoreTab]
+  );
+
+  const handleDeleteSelected = useCallback(
+    async (sessionId: string) => {
+      const selectedIds = selectedTabIdsBySession.get(sessionId) ?? [];
+      for (const tabId of selectedIds) {
+        await deleteTab(sessionId, tabId);
+      }
+      setSelectedTabIdsBySession((prev) => {
+        const next = new Map(prev);
+        next.delete(sessionId);
+        return next;
+      });
+    },
+    [selectedTabIdsBySession, deleteTab]
   );
 
   if (loading) {
@@ -116,6 +196,11 @@ export function App() {
           onRename={handleRename}
           onToggleStar={toggleStar}
           onSaveAll={saveAllTabs}
+          selectedTabIdsBySession={selectedTabIdsBySession}
+          onToggleTabSelect={handleToggleTabSelect}
+          onSelectAllTabs={handleSelectAllTabs}
+          onRestoreSelected={handleRestoreSelected}
+          onDeleteSelected={handleDeleteSelected}
         />
       </main>
     </div>

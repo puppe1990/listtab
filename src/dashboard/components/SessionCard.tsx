@@ -10,6 +10,11 @@ interface SessionCardProps {
   onDeleteSession: (session: Session) => void;
   onRename: (session: Session, newName: string) => void;
   onToggleStar: (session: Session) => void;
+  selectedTabIds: string[];
+  onToggleTabSelect: (tabId: string) => void;
+  onSelectAllTabs: () => void;
+  onRestoreSelected: () => void;
+  onDeleteSelected: () => void;
 }
 
 export function SessionCard({
@@ -20,6 +25,11 @@ export function SessionCard({
   onDeleteSession,
   onRename,
   onToggleStar,
+  selectedTabIds,
+  onToggleTabSelect,
+  onSelectAllTabs,
+  onRestoreSelected,
+  onDeleteSelected,
 }: SessionCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(session.name);
@@ -54,6 +64,17 @@ export function SessionCard({
           {session.isStarred ? '⭐' : '☆'}
         </button>
 
+        <input
+          type="checkbox"
+          title="Select all tabs"
+          checked={
+            selectedTabIds.length === session.tabs.length &&
+            session.tabs.length > 0
+          }
+          onChange={onSelectAllTabs}
+          className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-indigo-500"
+        />
+
         <div className="min-w-0 flex-1">
           {isEditing ? (
             <input
@@ -83,6 +104,23 @@ export function SessionCard({
             {session.tabCount} tab{session.tabCount !== 1 ? 's' : ''}
           </p>
         </div>
+
+        {selectedTabIds.length > 0 && (
+          <>
+            <button
+              onClick={onRestoreSelected}
+              className="rounded-lg border border-indigo-600 px-3 py-1.5 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:border-indigo-400 dark:hover:bg-indigo-900/30 transition-colors"
+            >
+              Open Selected
+            </button>
+            <button
+              onClick={onDeleteSelected}
+              className="rounded-lg border border-red-600 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:border-red-400 dark:hover:bg-red-900/30 transition-colors"
+            >
+              Delete Selected
+            </button>
+          </>
+        )}
 
         <button
           onClick={() => onRestoreAll(session)}
@@ -119,6 +157,8 @@ export function SessionCard({
             tab={tab}
             onRestore={onRestoreTab}
             onDelete={onDeleteTab}
+            isSelected={selectedTabIds.includes(tab.id)}
+            onToggleSelect={() => onToggleTabSelect(tab.id)}
           />
         ))}
       </div>

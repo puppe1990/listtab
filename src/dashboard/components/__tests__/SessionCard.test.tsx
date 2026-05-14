@@ -22,53 +22,113 @@ const mockSession: Session = {
   isStarred: false,
 };
 
+const defaultProps = {
+  onRestoreTab: () => {},
+  onDeleteTab: () => {},
+  onRestoreAll: () => {},
+  onDeleteSession: () => {},
+  onRename: () => {},
+  onToggleStar: () => {},
+  selectedTabIds: [] as string[],
+  onToggleTabSelect: () => {},
+  onSelectAllTabs: () => {},
+  onRestoreSelected: () => {},
+  onDeleteSelected: () => {},
+};
+
+function renderSessionCard(
+  overrides: Partial<React.ComponentProps<typeof SessionCard>> = {}
+) {
+  return render(
+    <SessionCard session={mockSession} {...defaultProps} {...overrides} />
+  );
+}
+
 describe('SessionCard', () => {
   it('should render session name and tab count', () => {
-    render(
-      <SessionCard
-        session={mockSession}
-        onRestoreTab={() => {}}
-        onDeleteTab={() => {}}
-        onRestoreAll={() => {}}
-        onDeleteSession={() => {}}
-        onRename={() => {}}
-        onToggleStar={() => {}}
-      />
-    );
+    renderSessionCard();
     expect(screen.getByText('Session - May 13, 2026')).toBeInTheDocument();
     expect(screen.getByText('3 tabs')).toBeInTheDocument();
   });
 
   it('should render all tab items', () => {
-    render(
-      <SessionCard
-        session={mockSession}
-        onRestoreTab={() => {}}
-        onDeleteTab={() => {}}
-        onRestoreAll={() => {}}
-        onDeleteSession={() => {}}
-        onRename={() => {}}
-        onToggleStar={() => {}}
-      />
-    );
+    renderSessionCard();
     expect(screen.getByText('Tab t1')).toBeInTheDocument();
     expect(screen.getByText('Tab t2')).toBeInTheDocument();
     expect(screen.getByText('Tab t3')).toBeInTheDocument();
   });
 
-  it('should call onRestoreAll when button clicked', () => {
+  it('should render a checkbox for each tab', () => {
+    renderSessionCard();
+    const checkboxes = screen.getAllByRole('checkbox');
+    // 3 tab checkboxes + 1 select-all checkbox in header
+    expect(checkboxes).toHaveLength(4);
+  });
+
+  it('should call onToggleTabSelect when a tab checkbox is clicked', () => {
+    const handleToggle = vi.fn();
+    renderSessionCard({ onToggleTabSelect: handleToggle });
+    const checkboxes = screen.getAllByRole('checkbox');
+    // checkboxes[0] is the select-all checkbox in header
+    fireEvent.click(checkboxes[1]);
+    expect(handleToggle).toHaveBeenCalledWith('t1');
+  });
+
+  it('should render select-all checkbox in header', () => {
+    renderSessionCard();
+    expect(screen.getByTitle('Select all tabs')).toBeInTheDocument();
+  });
+
+  it('should call onSelectAllTabs when select-all checkbox clicked', () => {
+    const handleSelectAll = vi.fn();
+    renderSessionCard({ onSelectAllTabs: handleSelectAll });
+    fireEvent.click(screen.getByTitle('Select all tabs'));
+    expect(handleSelectAll).toHaveBeenCalledTimes(1);
+  });
+
+  it('should show bulk action buttons when tabs are selected', () => {
+    renderSessionCard({ selectedTabIds: ['t1'] });
+    expect(
+      screen.getByRole('button', { name: /open selected/i })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /delete selected/i })
+    ).toBeInTheDocument();
+  });
+
+  it('should hide bulk action buttons when no tabs are selected', () => {
+    renderSessionCard({ selectedTabIds: [] });
+    expect(
+      screen.queryByRole('button', { name: /open selected/i })
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: /delete selected/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('should call onRestoreSelected when open selected button clicked', () => {
+    const handleRestoreSelected = vi.fn();
+    renderSessionCard({
+      selectedTabIds: ['t1', 't2'],
+      onRestoreSelected: handleRestoreSelected,
+    });
+    fireEvent.click(screen.getByRole('button', { name: /open selected/i }));
+    expect(handleRestoreSelected).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onDeleteSelected when delete selected button clicked', () => {
+    const handleDeleteSelected = vi.fn();
+    renderSessionCard({
+      selectedTabIds: ['t1'],
+      onDeleteSelected: handleDeleteSelected,
+    });
+    fireEvent.click(screen.getByRole('button', { name: /delete selected/i }));
+    expect(handleDeleteSelected).toHaveBeenCalledTimes(1);
+  });
+
+  it('should call onRestoreAll when restore all button clicked', () => {
     const handleRestoreAll = vi.fn();
-    render(
-      <SessionCard
-        session={mockSession}
-        onRestoreTab={() => {}}
-        onDeleteTab={() => {}}
-        onRestoreAll={handleRestoreAll}
-        onDeleteSession={() => {}}
-        onRename={() => {}}
-        onToggleStar={() => {}}
-      />
-    );
+    renderSessionCard({ onRestoreAll: handleRestoreAll });
     fireEvent.click(screen.getByRole('button', { name: /restore all/i }));
     expect(handleRestoreAll).toHaveBeenCalledWith(mockSession);
   });
@@ -76,17 +136,7 @@ describe('SessionCard', () => {
   it('should call onDeleteSession when delete button clicked', () => {
     vi.spyOn(window, 'confirm').mockReturnValue(true);
     const handleDelete = vi.fn();
-    render(
-      <SessionCard
-        session={mockSession}
-        onRestoreTab={() => {}}
-        onDeleteTab={() => {}}
-        onRestoreAll={() => {}}
-        onDeleteSession={handleDelete}
-        onRename={() => {}}
-        onToggleStar={() => {}}
-      />
-    );
+    renderSessionCard({ onDeleteSession: handleDelete });
     fireEvent.click(screen.getByTitle('Delete session'));
     expect(handleDelete).toHaveBeenCalledWith(mockSession);
     vi.restoreAllMocks();
@@ -94,50 +144,20 @@ describe('SessionCard', () => {
 
   it('should show star filled when session is starred', () => {
     const starred: Session = { ...mockSession, isStarred: true };
-    render(
-      <SessionCard
-        session={starred}
-        onRestoreTab={() => {}}
-        onDeleteTab={() => {}}
-        onRestoreAll={() => {}}
-        onDeleteSession={() => {}}
-        onRename={() => {}}
-        onToggleStar={() => {}}
-      />
-    );
+    renderSessionCard({ session: starred });
     expect(screen.getByTitle('Unstar session')).toBeInTheDocument();
   });
 
   it('should call onToggleStar when star clicked', () => {
     const handleToggle = vi.fn();
-    render(
-      <SessionCard
-        session={mockSession}
-        onRestoreTab={() => {}}
-        onDeleteTab={() => {}}
-        onRestoreAll={() => {}}
-        onDeleteSession={() => {}}
-        onRename={() => {}}
-        onToggleStar={handleToggle}
-      />
-    );
+    renderSessionCard({ onToggleStar: handleToggle });
     fireEvent.click(screen.getByTitle('Star session'));
     expect(handleToggle).toHaveBeenCalledWith(mockSession);
   });
 
   it('should allow inline rename', () => {
     const handleRename = vi.fn();
-    render(
-      <SessionCard
-        session={mockSession}
-        onRestoreTab={() => {}}
-        onDeleteTab={() => {}}
-        onRestoreAll={() => {}}
-        onDeleteSession={() => {}}
-        onRename={handleRename}
-        onToggleStar={() => {}}
-      />
-    );
+    renderSessionCard({ onRename: handleRename });
     const name = screen.getByText('Session - May 13, 2026');
     fireEvent.click(name);
 

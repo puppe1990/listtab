@@ -11,6 +11,11 @@ interface SessionListProps {
   onRename: (session: Session, newName: string) => void;
   onToggleStar: (session: Session) => void;
   onSaveAll?: () => void;
+  selectedTabIdsBySession: Map<string, string[]>;
+  onToggleTabSelect: (sessionId: string, tabId: string) => void;
+  onSelectAllTabs: (sessionId: string) => void;
+  onRestoreSelected: (sessionId: string) => void;
+  onDeleteSelected: (sessionId: string) => void;
 }
 
 export function SessionList({
@@ -22,6 +27,11 @@ export function SessionList({
   onRename,
   onToggleStar,
   onSaveAll,
+  selectedTabIdsBySession,
+  onToggleTabSelect,
+  onSelectAllTabs,
+  onRestoreSelected,
+  onDeleteSelected,
 }: SessionListProps) {
   if (sessions.length === 0) {
     return <EmptyState onSaveAll={onSaveAll} />;
@@ -39,6 +49,11 @@ export function SessionList({
           onDeleteSession={onDeleteSession}
           onRename={onRename}
           onToggleStar={onToggleStar}
+          selectedTabIds={selectedTabIdsBySession.get(session.id) ?? []}
+          onToggleTabSelect={(tabId) => onToggleTabSelect(session.id, tabId)}
+          onSelectAllTabs={() => onSelectAllTabs(session.id)}
+          onRestoreSelected={() => onRestoreSelected(session.id)}
+          onDeleteSelected={() => onDeleteSelected(session.id)}
         />
       ))}
     </div>

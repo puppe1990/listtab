@@ -5,6 +5,8 @@ interface TabItemProps {
   tab: Tab;
   onRestore: (tab: Tab) => void;
   onDelete: (tab: Tab) => void;
+  onToggleSelect: () => void;
+  isSelected: boolean;
 }
 
 function getHostname(url: string): string {
@@ -15,13 +17,25 @@ function getHostname(url: string): string {
   }
 }
 
-export function TabItem({ tab, onRestore, onDelete }: TabItemProps) {
+export function TabItem({
+  tab,
+  onRestore,
+  onDelete,
+  onToggleSelect,
+  isSelected,
+}: TabItemProps) {
   const [imgError, setImgError] = useState(false);
 
   const showFallbackIcon = !tab.faviconUrl || imgError;
 
   return (
     <div className="group flex items-center gap-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 hover:border-gray-300 dark:hover:border-gray-600 transition-colors">
+      <input
+        type="checkbox"
+        checked={isSelected}
+        onChange={onToggleSelect}
+        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:checked:bg-indigo-500"
+      />
       {tab.faviconUrl && !imgError ? (
         <img
           src={tab.faviconUrl}

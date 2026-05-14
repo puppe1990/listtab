@@ -27,6 +27,21 @@ const makeSession = (id: string): Session => ({
   isStarred: false,
 });
 
+const makeSessionWithTabs = (id: string, tabIds: string[]): Session => ({
+  id,
+  name: `Session ${id}`,
+  tabs: tabIds.map((tid) => ({
+    id: tid,
+    title: `Tab ${tid}`,
+    url: `https://example.com/${tid}`,
+    pinned: false,
+    savedAt: 1,
+  })),
+  createdAt: Date.now(),
+  tabCount: tabIds.length,
+  isStarred: false,
+});
+
 const createMockUseSessions = () => ({
   sessions: [] as Session[],
   loading: false,
@@ -140,6 +155,108 @@ describe('App', () => {
     await waitFor(() => {
       expect(screen.getByText('Session github')).toBeInTheDocument();
       expect(screen.queryByText('Session google')).not.toBeInTheDocument();
+    });
+  });
+
+  it('should select a tab when its checkbox is clicked', async () => {
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      sessions: [makeSessionWithTabs('s1', ['t1', 't2'])],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session s1')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    // checkboxes[0] is select-all, checkboxes[1] is tab t1
+    fireEvent.click(checkboxes[1]);
+    expect(checkboxes[1]).toBeChecked();
+  });
+
+  it('should select all tabs when select-all is clicked', async () => {
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      sessions: [makeSessionWithTabs('s1', ['t1', 't2'])],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session s1')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    // checkboxes[0] is select-all, checkboxes[1] is t1, checkboxes[2] is t2
+    fireEvent.click(checkboxes[0]);
+    expect(checkboxes[0]).toBeChecked();
+    expect(checkboxes[1]).toBeChecked();
+    expect(checkboxes[2]).toBeChecked();
+  });
+
+  it('should deselect all tabs when select-all is clicked again', async () => {
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      sessions: [makeSessionWithTabs('s1', ['t1', 't2'])],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session s1')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[0]);
+    fireEvent.click(checkboxes[0]);
+    expect(checkboxes[0]).not.toBeChecked();
+    expect(checkboxes[1]).not.toBeChecked();
+    expect(checkboxes[2]).not.toBeChecked();
+  });
+
+  it('should call restoreTab for each selected tab when open selected is clicked', async () => {
+    const mockRestoreTab = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      restoreTab: mockRestoreTab,
+      sessions: [makeSessionWithTabs('s1', ['t1', 't2'])],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session s1')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[1]); // select t1
+    fireEvent.click(checkboxes[2]); // select t2
+
+    fireEvent.click(screen.getByRole('button', { name: /open selected/i }));
+
+    await waitFor(() => {
+      expect(mockRestoreTab).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('should call deleteTab for each selected tab when delete selected is clicked', async () => {
+    const mockDeleteTab = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      deleteTab: mockDeleteTab,
+      sessions: [makeSessionWithTabs('s1', ['t1', 't2'])],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session s1')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[1]); // select t1
+
+    fireEvent.click(screen.getByRole('button', { name: /delete selected/i }));
+
+    await waitFor(() => {
+      expect(mockDeleteTab).toHaveBeenCalledWith('s1', 't1');
     });
   });
 });

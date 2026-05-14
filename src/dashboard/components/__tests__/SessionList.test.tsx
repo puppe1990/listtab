@@ -45,6 +45,11 @@ describe('SessionList', () => {
         onDeleteSession={() => {}}
         onRename={() => {}}
         onToggleStar={() => {}}
+        selectedTabIdsBySession={new Map()}
+        onToggleTabSelect={() => {}}
+        onSelectAllTabs={() => {}}
+        onRestoreSelected={() => {}}
+        onDeleteSelected={() => {}}
       />
     );
     expect(screen.getByText('Session A')).toBeInTheDocument();
@@ -61,6 +66,11 @@ describe('SessionList', () => {
         onDeleteSession={() => {}}
         onRename={() => {}}
         onToggleStar={() => {}}
+        selectedTabIdsBySession={new Map()}
+        onToggleTabSelect={() => {}}
+        onSelectAllTabs={() => {}}
+        onRestoreSelected={() => {}}
+        onDeleteSelected={() => {}}
       />
     );
     expect(screen.getByText(/no tabs saved yet/i)).toBeInTheDocument();
@@ -76,6 +86,11 @@ describe('SessionList', () => {
         onDeleteSession={() => {}}
         onRename={() => {}}
         onToggleStar={() => {}}
+        selectedTabIdsBySession={new Map()}
+        onToggleTabSelect={() => {}}
+        onSelectAllTabs={() => {}}
+        onRestoreSelected={() => {}}
+        onDeleteSelected={() => {}}
       />
     );
     const buttons = screen.getAllByRole('button', { name: /restore all/i });

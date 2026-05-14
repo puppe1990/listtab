@@ -16,6 +16,7 @@ interface SessionListProps {
   onSelectAllTabs: (sessionId: string) => void;
   onRestoreSelected: (sessionId: string) => void;
   onDeleteSelected: (sessionId: string) => void;
+  onCopySelected?: (sessionId: string) => void;
 }
 
 export function SessionList({
@@ -32,6 +33,7 @@ export function SessionList({
   onSelectAllTabs,
   onRestoreSelected,
   onDeleteSelected,
+  onCopySelected,
 }: SessionListProps) {
   if (sessions.length === 0) {
     return <EmptyState onSaveAll={onSaveAll} />;
@@ -54,6 +56,7 @@ export function SessionList({
           onSelectAllTabs={() => onSelectAllTabs(session.id)}
           onRestoreSelected={() => onRestoreSelected(session.id)}
           onDeleteSelected={() => onDeleteSelected(session.id)}
+          onCopySelected={() => onCopySelected?.(session.id)}
         />
       ))}
     </div>

@@ -259,4 +259,91 @@ describe('App', () => {
       expect(mockDeleteTab).toHaveBeenCalledWith('s1', 't1');
     });
   });
+
+  it('should show toast when copy selected is clicked', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    vi.stubGlobal('navigator', {
+      clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
+    });
+
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      sessions: [makeSessionWithTabs('s1', ['t1', 't2'])],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session s1')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[1]); // select t1
+
+    fireEvent.click(screen.getByRole('button', { name: /copy selected/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Links copied to clipboard!'
+      );
+    });
+
+    vi.unstubAllGlobals();
+    vi.useRealTimers();
+  });
+
+  it('should show toast when open selected is clicked', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const mockRestoreTab = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      restoreTab: mockRestoreTab,
+      sessions: [makeSessionWithTabs('s1', ['t1'])],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session s1')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[1]); // select t1
+
+    fireEvent.click(screen.getByRole('button', { name: /open selected/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Selected tabs opened!'
+      );
+    });
+
+    vi.useRealTimers();
+  });
+
+  it('should show toast when delete selected is clicked', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    const mockDeleteTab = vi.fn().mockResolvedValue(undefined);
+    vi.mocked(useSessions).mockReturnValue({
+      ...createMockUseSessions(),
+      loading: false,
+      deleteTab: mockDeleteTab,
+      sessions: [makeSessionWithTabs('s1', ['t1'])],
+    });
+    render(<App />);
+    await waitFor(() => {
+      expect(screen.getByText('Session s1')).toBeInTheDocument();
+    });
+
+    const checkboxes = screen.getAllByRole('checkbox');
+    fireEvent.click(checkboxes[1]); // select t1
+
+    fireEvent.click(screen.getByRole('button', { name: /delete selected/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('status')).toHaveTextContent(
+        'Selected tabs removed!'
+      );
+    });
+
+    vi.useRealTimers();
+  });
 });

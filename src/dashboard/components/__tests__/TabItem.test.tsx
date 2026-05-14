@@ -164,10 +164,11 @@ describe('TabItem', () => {
   });
 
   describe('link', () => {
-    let windowOpenSpy: ReturnType<typeof vi.spyOn>;
+    let windowOpenSpy: ReturnType<typeof vi.fn>;
 
     beforeEach(() => {
-      windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+      windowOpenSpy = vi.fn(() => null);
+      window.open = windowOpenSpy;
     });
 
     afterEach(() => {

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { SessionCard } from '../SessionCard';
 import type { Session, Tab } from '../../../shared/types';
@@ -34,6 +34,7 @@ const defaultProps = {
   onSelectAllTabs: () => {},
   onRestoreSelected: () => {},
   onDeleteSelected: () => {},
+  onCopySelected: () => {},
 };
 
 function renderSessionCard(
@@ -166,5 +167,57 @@ describe('SessionCard', () => {
     fireEvent.blur(input);
 
     expect(handleRename).toHaveBeenCalledWith(mockSession, 'My Custom Name');
+  });
+
+  it('should show copy selected button when tabs are selected', () => {
+    renderSessionCard({ selectedTabIds: ['t1'] });
+    expect(
+      screen.getByRole('button', { name: /copy selected/i })
+    ).toBeInTheDocument();
+  });
+
+  it('should hide copy selected button when no tabs are selected', () => {
+    renderSessionCard({ selectedTabIds: [] });
+    expect(
+      screen.queryByRole('button', { name: /copy selected/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it('should copy selected tab urls to clipboard when copy selected clicked', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    vi.stubGlobal('navigator', {
+      clipboard: { writeText },
+    });
+
+    renderSessionCard({ selectedTabIds: ['t1', 't3'] });
+    fireEvent.click(screen.getByRole('button', { name: /copy selected/i }));
+
+    await waitFor(() => {
+      expect(writeText).toHaveBeenCalledWith(
+        'https://example.com/t1\nhttps://example.com/t3'
+      );
+    });
+
+    vi.unstubAllGlobals();
+  });
+
+  it('should call onCopySelected when copy selected button clicked', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    const handleCopySelected = vi.fn();
+    vi.stubGlobal('navigator', {
+      clipboard: { writeText },
+    });
+
+    renderSessionCard({
+      selectedTabIds: ['t1'],
+      onCopySelected: handleCopySelected,
+    });
+    fireEvent.click(screen.getByRole('button', { name: /copy selected/i }));
+
+    await waitFor(() => {
+      expect(handleCopySelected).toHaveBeenCalledTimes(1);
+    });
+
+    vi.unstubAllGlobals();
   });
 });

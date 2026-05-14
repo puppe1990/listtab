@@ -15,6 +15,7 @@ interface SessionCardProps {
   onSelectAllTabs: () => void;
   onRestoreSelected: () => void;
   onDeleteSelected: () => void;
+  onCopySelected?: () => void;
 }
 
 export function SessionCard({
@@ -30,6 +31,7 @@ export function SessionCard({
   onSelectAllTabs,
   onRestoreSelected,
   onDeleteSelected,
+  onCopySelected,
 }: SessionCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(session.name);
@@ -51,6 +53,15 @@ export function SessionCard({
     if (window.confirm(`Delete "${session.name}" and all its tabs?`)) {
       onDeleteSession(session);
     }
+  };
+
+  const handleCopySelected = async () => {
+    const selectedUrls = session.tabs
+      .filter((tab) => selectedTabIds.includes(tab.id))
+      .map((tab) => tab.url);
+    if (selectedUrls.length === 0) return;
+    await navigator.clipboard.writeText(selectedUrls.join('\n'));
+    onCopySelected?.();
   };
 
   return (
@@ -118,6 +129,12 @@ export function SessionCard({
               className="rounded-lg border border-red-600 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:text-red-400 dark:border-red-400 dark:hover:bg-red-900/30 transition-colors"
             >
               Delete Selected
+            </button>
+            <button
+              onClick={handleCopySelected}
+              className="rounded-lg border border-emerald-600 px-3 py-1.5 text-xs font-medium text-emerald-600 hover:bg-emerald-50 dark:text-emerald-400 dark:border-emerald-400 dark:hover:bg-emerald-900/30 transition-colors"
+            >
+              Copy Selected
             </button>
           </>
         )}

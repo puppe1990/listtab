@@ -1,8 +1,10 @@
 import { useState, useMemo, useCallback } from 'react';
 import { useSessions } from './hooks/useSessions';
+import { useToast } from './hooks/useToast';
 import { SearchBar } from './components/SearchBar';
 import { SessionList } from './components/SessionList';
 import { Toolbar } from './components/Toolbar';
+import { Toast } from './components/Toast';
 import type { Session, Tab } from '../shared/types';
 
 export function App() {
@@ -22,6 +24,13 @@ export function App() {
     importSessions,
     deleteTab,
   } = useSessions();
+
+  const {
+    message: toastMessage,
+    isVisible: toastVisible,
+    showToast,
+    hideToast,
+  } = useToast();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedTabIdsBySession, setSelectedTabIdsBySession] = useState<
@@ -127,8 +136,9 @@ export function App() {
         next.delete(sessionId);
         return next;
       });
+      showToast('Selected tabs opened!');
     },
-    [sessions, selectedTabIdsBySession, restoreTab]
+    [sessions, selectedTabIdsBySession, restoreTab, showToast]
   );
 
   const handleDeleteSelected = useCallback(
@@ -142,9 +152,14 @@ export function App() {
         next.delete(sessionId);
         return next;
       });
+      showToast('Selected tabs removed!');
     },
-    [selectedTabIdsBySession, deleteTab]
+    [selectedTabIdsBySession, deleteTab, showToast]
   );
+
+  const handleCopySelected = useCallback(() => {
+    showToast('Links copied to clipboard!');
+  }, [showToast]);
 
   if (loading) {
     return (
@@ -201,8 +216,15 @@ export function App() {
           onSelectAllTabs={handleSelectAllTabs}
           onRestoreSelected={handleRestoreSelected}
           onDeleteSelected={handleDeleteSelected}
+          onCopySelected={handleCopySelected}
         />
       </main>
+
+      <Toast
+        message={toastMessage}
+        isVisible={toastVisible}
+        onClose={hideToast}
+      />
     </div>
   );
 }

@@ -72,19 +72,90 @@ describe('TabItem', () => {
     expect(handleRestore).toHaveBeenCalledWith(mockTab);
   });
 
-  it('should call onDelete when delete button clicked', () => {
-    const handleDelete = vi.fn();
-    render(
-      <TabItem
-        tab={mockTab}
-        onRestore={() => {}}
-        onDelete={handleDelete}
-        onToggleSelect={() => {}}
-        isSelected={false}
-      />
-    );
-    fireEvent.click(screen.getByTitle('Remove from list'));
-    expect(handleDelete).toHaveBeenCalledWith(mockTab);
+  describe('delete confirmation modal', () => {
+    it('should open modal when delete button clicked', () => {
+      render(
+        <TabItem
+          tab={mockTab}
+          onRestore={() => {}}
+          onDelete={() => {}}
+          onToggleSelect={() => {}}
+          isSelected={false}
+        />
+      );
+      fireEvent.click(screen.getByTitle('Remove from list'));
+      expect(screen.getByText('Remove tab?')).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          'Are you sure you want to remove "GitHub" from this session?'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('should not call onDelete when delete button clicked', () => {
+      const handleDelete = vi.fn();
+      render(
+        <TabItem
+          tab={mockTab}
+          onRestore={() => {}}
+          onDelete={handleDelete}
+          onToggleSelect={() => {}}
+          isSelected={false}
+        />
+      );
+      fireEvent.click(screen.getByTitle('Remove from list'));
+      expect(handleDelete).not.toHaveBeenCalled();
+    });
+
+    it('should call onDelete when confirm button clicked in modal', () => {
+      const handleDelete = vi.fn();
+      render(
+        <TabItem
+          tab={mockTab}
+          onRestore={() => {}}
+          onDelete={handleDelete}
+          onToggleSelect={() => {}}
+          isSelected={false}
+        />
+      );
+      fireEvent.click(screen.getByTitle('Remove from list'));
+      fireEvent.click(screen.getByTestId('confirm-modal-button'));
+      expect(handleDelete).toHaveBeenCalledWith(mockTab);
+    });
+
+    it('should close modal and not call onDelete when cancel clicked', () => {
+      const handleDelete = vi.fn();
+      render(
+        <TabItem
+          tab={mockTab}
+          onRestore={() => {}}
+          onDelete={handleDelete}
+          onToggleSelect={() => {}}
+          isSelected={false}
+        />
+      );
+      fireEvent.click(screen.getByTitle('Remove from list'));
+      fireEvent.click(screen.getByRole('button', { name: /cancel/i }));
+      expect(handleDelete).not.toHaveBeenCalled();
+      expect(screen.queryByText('Remove tab?')).not.toBeInTheDocument();
+    });
+
+    it('should close modal and not call onDelete when overlay clicked', () => {
+      const handleDelete = vi.fn();
+      render(
+        <TabItem
+          tab={mockTab}
+          onRestore={() => {}}
+          onDelete={handleDelete}
+          onToggleSelect={() => {}}
+          isSelected={false}
+        />
+      );
+      fireEvent.click(screen.getByTitle('Remove from list'));
+      fireEvent.click(screen.getByTestId('modal-overlay'));
+      expect(handleDelete).not.toHaveBeenCalled();
+      expect(screen.queryByText('Remove tab?')).not.toBeInTheDocument();
+    });
   });
 
   it('should truncate long titles', () => {

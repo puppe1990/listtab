@@ -5,7 +5,7 @@ import { TabItem } from './TabItem';
 interface SessionCardProps {
   session: Session;
   onRestoreTab: (tab: Tab) => void;
-  onDeleteTab: (tab: Tab) => void;
+  onDeleteTab: (sessionId: string, tab: Tab) => void;
   onRestoreAll: (session: Session) => void;
   onDeleteSession: (session: Session) => void;
   onRename: (session: Session, newName: string) => void;
@@ -35,6 +35,10 @@ export function SessionCard({
 }: SessionCardProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editName, setEditName] = useState(session.name);
+
+  const handleDeleteTab = (tab: Tab) => {
+    onDeleteTab(session.id, tab);
+  };
 
   useEffect(() => {
     setEditName(session.name);
@@ -173,7 +177,7 @@ export function SessionCard({
             key={tab.id}
             tab={tab}
             onRestore={onRestoreTab}
-            onDelete={onDeleteTab}
+            onDelete={handleDeleteTab}
             isSelected={selectedTabIds.includes(tab.id)}
             onToggleSelect={() => onToggleTabSelect(tab.id)}
           />

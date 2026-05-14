@@ -58,8 +58,8 @@ export function App() {
   );
 
   const handleDeleteTab = useCallback(
-    (tab: Tab) => {
-      deleteTab('', tab.id);
+    (sessionId: string, tab: Tab) => {
+      deleteTab(sessionId, tab.id);
     },
     [deleteTab]
   );

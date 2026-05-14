@@ -220,4 +220,16 @@ describe('SessionCard', () => {
 
     vi.unstubAllGlobals();
   });
+
+  describe('delete tab propagation', () => {
+    it('should propagate sessionId and tab to onDeleteTab when tab delete confirmed', () => {
+      const handleDeleteTab = vi.fn();
+      renderSessionCard({ onDeleteTab: handleDeleteTab });
+
+      fireEvent.click(screen.getAllByTitle('Remove from list')[0]);
+      fireEvent.click(screen.getByTestId('confirm-modal-button'));
+
+      expect(handleDeleteTab).toHaveBeenCalledWith('s1', mockSession.tabs[0]);
+    });
+  });
 });

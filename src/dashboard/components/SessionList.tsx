@@ -5,7 +5,7 @@ import { EmptyState } from './EmptyState';
 interface SessionListProps {
   sessions: Session[];
   onRestoreTab: (tab: Tab) => void;
-  onDeleteTab: (tab: Tab) => void;
+  onDeleteTab: (sessionId: string, tab: Tab) => void;
   onRestoreAll: (session: Session) => void;
   onDeleteSession: (session: Session) => void;
   onRename: (session: Session, newName: string) => void;

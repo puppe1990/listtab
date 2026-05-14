@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { TabItem } from '../TabItem';
@@ -161,5 +161,75 @@ describe('TabItem', () => {
     fireEvent.click(screen.getByRole('checkbox'));
     expect(handleRestore).not.toHaveBeenCalled();
     expect(handleDelete).not.toHaveBeenCalled();
+  });
+
+  describe('link', () => {
+    let windowOpenSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      windowOpenSpy = vi.spyOn(window, 'open').mockImplementation(() => null);
+    });
+
+    afterEach(() => {
+      windowOpenSpy.mockRestore();
+    });
+
+    it('should render title and hostname inside a link with correct href', () => {
+      render(
+        <TabItem
+          tab={mockTab}
+          onRestore={() => {}}
+          onDelete={() => {}}
+          onToggleSelect={() => {}}
+          isSelected={false}
+        />
+      );
+      const link = screen.getByText('GitHub').closest('a');
+      expect(link).toHaveAttribute('href', 'https://github.com');
+      expect(link).toHaveAttribute('target', '_blank');
+      expect(link).toHaveAttribute('rel', 'noopener noreferrer');
+    });
+
+    it('should open url in new tab on click', () => {
+      render(
+        <TabItem
+          tab={mockTab}
+          onRestore={() => {}}
+          onDelete={() => {}}
+          onToggleSelect={() => {}}
+          isSelected={false}
+        />
+      );
+      fireEvent.click(screen.getByText('GitHub'));
+      expect(windowOpenSpy).toHaveBeenCalledWith(
+        'https://github.com',
+        '_blank'
+      );
+    });
+
+    it('should open url in new tab on middle click (auxClick button 1)', () => {
+      render(
+        <TabItem
+          tab={mockTab}
+          onRestore={() => {}}
+          onDelete={() => {}}
+          onToggleSelect={() => {}}
+          isSelected={false}
+        />
+      );
+      const title = screen.getByText('GitHub');
+      fireEvent(
+        title,
+        new MouseEvent('auxclick', {
+          bubbles: true,
+          cancelable: true,
+          button: 1,
+        })
+      );
+      expect(windowOpenSpy).toHaveBeenCalledWith(
+        'https://github.com',
+        '_blank'
+      );
+    });
   });
 });

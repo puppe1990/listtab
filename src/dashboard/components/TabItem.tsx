@@ -46,14 +46,30 @@ export function TabItem({
       ) : null}
       {showFallbackIcon && <span className="flex-shrink-0 text-sm">🌐</span>}
 
-      <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100">
+      <a
+        href={tab.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        onClick={(e) => {
+          e.preventDefault();
+          window.open(tab.url, '_blank');
+        }}
+        onAuxClick={(e) => {
+          if (e.button === 1) {
+            e.preventDefault();
+            window.open(tab.url, '_blank');
+          }
+        }}
+        className="min-w-0 flex-1 cursor-pointer"
+        title={tab.url}
+      >
+        <p className="truncate text-sm font-medium text-gray-900 dark:text-gray-100 hover:underline">
           {tab.title}
         </p>
         <p className="truncate text-xs text-gray-500 dark:text-gray-400">
           {getHostname(tab.url)}
         </p>
-      </div>
+      </a>
 
       <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
